@@ -1,0 +1,17 @@
+﻿@model VehicleRentalWeb.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Vehicle Details";
+}
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<div class="card shadow-sm p-4 mb-4 bg-light">
+    <h5 class="card-title">@Model.Make @Model.Model (@Model.Year)</h5>
+    <p><strong>Color:</strong> @Model.Color</p>
+    <p><strong>Supplier / Source:</strong> @Model.Supplier</p>
+    <p><strong>Rate Per Day:</strong> $@Model.RatePerDay</p>
+    <p><strong>Available:</strong> @(Model.IsAvailable ? "Yes" : "No")</p>
+</div>
+
+<a asp-controller="Vehicle" asp-action="Index" class="btn btn-primary">Back to List</a>

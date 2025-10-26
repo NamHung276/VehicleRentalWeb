@@ -1,0 +1,46 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Vehicle>
+
+@{
+    ViewData["Title"] = "Vehicle List";
+}
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<p>
+    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-primary">Add New Vehicle</a>
+</p>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Year</th>
+            <th>Color</th>
+            <th>Supplier</th>
+            <th>Rate/Day ($)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.Id</td>
+                <td>@v.GetType().Name</td>
+                <td>@v.Make</td>
+                <td>@v.Model</td>
+                <td>@v.Year</td>
+                <td>@v.Color</td>
+                <td>@v.Supplier</td>
+                <td>@v.RatePerDay</td>
+                <td>
+                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-info">View</a>
+                    <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@v.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
