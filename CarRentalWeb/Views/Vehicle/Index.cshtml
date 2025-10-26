@@ -6,11 +6,15 @@
 
 <h2 class="mb-3">@ViewData["Title"]</h2>
 
-<p>
-    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-primary">Add New Vehicle</a>
-</p>
+<div class="d-flex justify-content-between mb-3">
+    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success">Add New Vehicle</a>
+    <form method="get" asp-controller="Vehicle" asp-action="Index" class="d-flex">
+        <input type="text" name="search" class="form-control me-2" placeholder="Search by Make or Model" />
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+    </form>
+</div>
 
-<table class="table table-bordered table-hover align-middle">
+<table class="table table-striped table-hover align-middle shadow-sm">
     <thead class="table-dark">
         <tr>
             <th>ID</th>
@@ -21,7 +25,8 @@
             <th>Color</th>
             <th>Supplier</th>
             <th>Rate/Day ($)</th>
-            <th></th>
+            <th>Available</th>
+            <th class="text-center">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -35,9 +40,10 @@
                 <td>@v.Year</td>
                 <td>@v.Color</td>
                 <td>@v.Supplier</td>
-                <td>@v.RatePerDay</td>
-                <td>
-                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-info">View</a>
+                <td>@v.RatePerDay.ToString("0.00")</td>
+                <td>@(v.IsAvailable ? "Yes" : "No")</td>
+                <td class="text-center">
+                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-info me-1">View</a>
                     <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@v.Id" class="btn btn-sm btn-outline-danger">Delete</a>
                 </td>
             </tr>

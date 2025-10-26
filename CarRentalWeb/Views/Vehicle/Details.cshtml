@@ -4,14 +4,24 @@
     ViewData["Title"] = "Vehicle Details";
 }
 
-<h2 class="mb-3">@ViewData["Title"]</h2>
+<h2 class="mb-4">@ViewData["Title"]</h2>
 
-<div class="card shadow-sm p-4 mb-4 bg-light">
-    <h5 class="card-title">@Model.Make @Model.Model (@Model.Year)</h5>
-    <p><strong>Color:</strong> @Model.Color</p>
-    <p><strong>Supplier / Source:</strong> @Model.Supplier</p>
-    <p><strong>Rate Per Day:</strong> $@Model.RatePerDay</p>
-    <p><strong>Available:</strong> @(Model.IsAvailable ? "Yes" : "No")</p>
+<div class="card shadow-lg border-0 p-4 mb-4 bg-light">
+    <div class="row g-4">
+        <div class="col-md-4 text-center">
+            <img src="~/images/default-car.jpg" alt="Vehicle Image" class="img-fluid rounded border" />
+        </div>
+
+        <div class="col-md-8">
+            <h4 class="mb-3 text-primary">@Model.Make @Model.Model (@Model.Year)</h4>
+            <p><strong>Color:</strong> @Model.Color</p>
+            <p><strong>Supplier:</strong> @Model.Supplier</p>
+            <p><strong>Rate Per Day:</strong> $@Model.RatePerDay.ToString("0.00")</p>
+            <p><strong>Available:</strong> @(Model.IsAvailable ? "Yes" : "No")</p>
+
+            <div class="mt-4">
+                <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
 </div>
-
-<a asp-controller="Vehicle" asp-action="Index" class="btn btn-primary">Back to List</a>
