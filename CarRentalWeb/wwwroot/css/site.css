@@ -1,5 +1,8 @@
+/* ===GLOBAL STYLES=== */
 html {
     font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -8,36 +11,35 @@ html {
     }
 }
 
-html {
-    position: relative;
-    min-height: 100%;
-}
-
 body {
     margin-bottom: 60px;
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
 }
 
-/* Navbar styling */
+/* ===NAVBAR=== */
 .navbar {
     background-color: #e3f2fd !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .navbar-brand {
     font-weight: bold;
     color: #0d6efd !important;
+    letter-spacing: 0.5px;
 }
 
 .nav-link {
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, transform 0.2s ease;
 }
 
     .nav-link:hover {
         color: #0a58ca !important;
+        transform: translateY(-1px);
     }
 
-/* Footer styling */
+/* === FOOTER ==== */
 footer {
     position: absolute;
     bottom: 0;
@@ -47,43 +49,18 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #666;
+    font-size: 0.9rem;
 }
 
-/* Button focus styles */
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+/* === BUTTONS === */
+.btn {
+    border-radius: 8px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
-/* Page layout */
-.container {
-    padding-top: 20px;
-    padding-bottom: 80px;
-}
-
-/* Table formatting for Index pages */
-table {
-    border-collapse: collapse;
-    width: 100%;
-    background-color: #ffffff;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-}
-
-th {
-    background-color: #0d6efd;
-    color: white;
-}
-
-/* Buttons */
 .btn-primary {
     background-color: #0d6efd;
     border-color: #0d6efd;
@@ -103,3 +80,105 @@ th {
         background-color: #bb2d3b;
         border-color: #b02a37;
     }
+
+/* === BUTTON FOCUS === */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* === TABLES === */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+th {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* === PAGE LAYOUT === */
+.container {
+    padding-top: 20px;
+    padding-bottom: 80px;
+}
+
+.main-content {
+    min-height: 80vh;
+}
+
+/* === HOME PAGE HERO SECTION === */
+.home-hero {
+    padding: 80px 0;
+    background: linear-gradient(to bottom, #eaf4ff 0%, #ffffff 100%);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .home-hero:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .home-hero h1 {
+        color: #007bff;
+    }
+
+    .home-hero p {
+        color: #555;
+    }
+
+/* === HOME FEATURE SECTION === */
+.features {
+    padding: 60px 0;
+}
+
+.feature-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-box h4 {
+        margin-bottom: 15px;
+    }
+
+    .feature-box p {
+        color: #555;
+        font-size: 1rem;
+    }
+
+/* === FEATURE BOX LINKS === */
+.feature-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+    .feature-link:hover .feature-box {
+        transform: translateY(-8px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+    }
+
+.feature-box .btn {
+    pointer-events: none; /* Prevent double-click conflict */
+}

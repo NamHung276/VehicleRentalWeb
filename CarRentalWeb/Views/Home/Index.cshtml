@@ -1,8 +1,49 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-hero text-center">
+    <h1 class="display-4 fw-bold text-primary mb-3">Welcome to Vehicle Rental System</h1>
+    <p class="lead text-secondary mb-4">
+        Manage vehicles, customers, and rental transactions all in one place.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3 mb-5">
+        <a asp-controller="Vehicle" asp-action="Index" class="btn btn-primary btn-lg">View Vehicles</a>
+        <a asp-controller="Customer" asp-action="Index" class="btn btn-outline-primary btn-lg">View Customers</a>
+    </div>
 </div>
+
+<!-- Feature Section -->
+<div class="features container text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-4">
+            <a asp-controller="Vehicle" asp-action="Index" class="feature-link">
+                <div class="feature-box">
+                    <h4 class="fw-bold text-primary">Vehicle Management</h4>
+                    <p>Easily add, edit, or remove vehicles with details and availability tracking.</p>
+                    <span class="btn btn-primary mt-3">Go to Vehicles</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-4">
+            <a asp-controller="Customer" asp-action="Index" class="feature-link">
+                <div class="feature-box">
+                    <h4 class="fw-bold text-primary">Customer Records</h4>
+                    <p>Keep track of your customers, rental history, and contact details efficiently.</p>
+                    <span class="btn btn-outline-primary mt-3">Go to Customers</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-4">
+            <a asp-controller="Rental" asp-action="Index" class="feature-link">
+                <div class="feature-box">
+                    <h4 class="fw-bold text-primary">Rental Transactions</h4>
+                    <p>View and manage active and past rentals with quick filtering and actions.</p>
+                    <span class="btn btn-outline-primary mt-3">Go to Rentals</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
