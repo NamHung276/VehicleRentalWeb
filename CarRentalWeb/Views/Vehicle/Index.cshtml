@@ -1,52 +1,41 @@
 ﻿@model IEnumerable<VehicleRentalWeb.Models.Vehicle>
 
 @{
-    ViewData["Title"] = "Vehicle List";
+    ViewData["Title"] = "Vehicle Catalog";
 }
 
-<h2 class="mb-3">@ViewData["Title"]</h2>
+<h2 class="text-center mb-4 fw-bold text-primary">@ViewData["Title"]</h2>
 
-<div class="d-flex justify-content-between mb-3">
-    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success">Add New Vehicle</a>
-    <form method="get" asp-controller="Vehicle" asp-action="Index" class="d-flex">
-        <input type="text" name="search" class="form-control me-2" placeholder="Search by Make or Model" />
-        <button type="submit" class="btn btn-outline-primary">Search</button>
-    </form>
+<div class="text-center mb-4">
+    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success btn-lg me-2">Add New Vehicle</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">Back to Home</a>
 </div>
 
-<table class="table table-striped table-hover align-middle shadow-sm">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Make</th>
-            <th>Model</th>
-            <th>Year</th>
-            <th>Color</th>
-            <th>Supplier</th>
-            <th>Rate/Day ($)</th>
-            <th>Available</th>
-            <th class="text-center">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var v in Model)
-        {
-            <tr>
-                <td>@v.Id</td>
-                <td>@v.GetType().Name</td>
-                <td>@v.Make</td>
-                <td>@v.Model</td>
-                <td>@v.Year</td>
-                <td>@v.Color</td>
-                <td>@v.Supplier</td>
-                <td>@v.RatePerDay.ToString("0.00")</td>
-                <td>@(v.IsAvailable ? "Yes" : "No")</td>
-                <td class="text-center">
-                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@v.Id" class="btn btn-sm btn-outline-info me-1">View</a>
-                    <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@v.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<!-- Vehicle Grid Section -->
+<div class="row row-cols-1 row-cols-md-3 g-4 car-grid">
+    @foreach (var car in Model)
+    {
+        <div class="col">
+            <div class="car-card shadow-sm">
+                <img src="@(string.IsNullOrEmpty(car.ImagePath) ? "/images/default_car.jpg" : car.ImagePath)"
+                     alt="@car.Make @car.Model"
+                     class="car-image" />
+
+                <div class="car-info">
+                    <h5 class="car-name">@car.Make @car.Model</h5>
+                    <p class="car-details">@car.Year • @car.Color</p>
+                    <p class="car-details">Supplier: @car.Supplier</p>
+                    <div class="car-footer d-flex justify-content-between align-items-center">
+                        <span class="price">$@car.RatePerDay.ToString("0.00") / day</span>
+                        <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@car.Id" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center mt-5">No vehicles available at the moment.</div>
+}

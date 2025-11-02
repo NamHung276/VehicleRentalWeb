@@ -9,6 +9,8 @@ namespace VehicleRentalWeb.Models
 
         [Display(Name = "Fuel Type")]
         public string FuelType { get; set; } = "Regular";
+        [Display(Name = "Image Path")]
+        public new string ImagePath { get; set; } = "/images/default_car.jpg";
 
         public override decimal CalculateCost(int days)
         {

@@ -10,10 +10,29 @@ namespace VehicleRentalWeb.Controllers
         // Temporary static list (will later move to database)
         // Replace 'Vehicle' with a concrete class, e.g., 'Car'
         private static List<Car> vehicles = new List<Car>
-        {
-            new Car { Id = 1, Make = "Toyota", Model = "Camry", Year = 2020, Color = "White", Supplier = "Alice" },
-            new Car { Id = 2, Make = "Honda", Model = "Civic", Year = 2021, Color = "Blue", Supplier = "Bob" }
-        };
+{
+    new Car {
+        Id = 1,
+        Make = "Toyota",
+        Model = "Camry",
+        Year = 2020,
+        Color = "White",
+        Supplier = "Alice",
+        RatePerDay = 50m,
+        ImagePath = "/images/toyota_camry.jpg"
+    },
+    new Car {
+        Id = 2,
+        Make = "Honda",
+        Model = "Civic",
+        Year = 2021,
+        Color = "Blue",
+        Supplier = "Bob",
+        RatePerDay = 45m,
+        ImagePath = "/images/honda_civic.jpg"
+    }
+};
+
 
         public IActionResult Index()
         {

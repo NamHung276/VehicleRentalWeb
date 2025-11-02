@@ -28,6 +28,9 @@ namespace VehicleRentalWeb.Models
         [Range(0, 10000)]
         public decimal RatePerDay { get; set; }
 
+        [Display(Name = "Image Path")]
+        public string ImagePath { get; set; } = "/images/default_car.jpg";
+
         // Polymorphic cost calculation
         public abstract decimal CalculateCost(int days);
     }
