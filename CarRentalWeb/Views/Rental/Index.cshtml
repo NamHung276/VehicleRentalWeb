@@ -1,0 +1,59 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Rental>
+
+@{
+    ViewData["Title"] = "Rental Transactions";
+}
+
+<h2 class="text-center mb-4 fw-bold text-primary">@ViewData["Title"]</h2>
+
+<div class="text-center mb-4">
+    <a asp-controller="Rental" asp-action="Create" class="btn btn-success btn-lg me-2">Add New Rental</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+</div>
+
+<table class="table table-striped table-hover align-middle shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Total Cost ($)</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rental in Model)
+        {
+            <tr>
+                <td>@rental.Id</td>
+                <td>@rental.CustomerName</td>
+                <td>@rental.VehicleName</td>
+                <td>@rental.StartDate.ToShortDateString()</td>
+                <td>@rental.EndDate.ToShortDateString()</td>
+                <td>@rental.TotalCost.ToString("0.00")</td>
+                <td>
+                    @if (rental.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Completed</span>
+                    }
+                </td>
+                <td class="text-center">
+                    <a asp-controller="Rental" asp-action="Details" asp-route-id="@rental.Id" class="btn btn-sm btn-outline-primary me-1">View</a>
+                    <a asp-controller="Rental" asp-action="Delete" asp-route-id="@rental.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center mt-5">No rental records available.</div>
+}

@@ -1,51 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using VehicleRentalWeb.Models;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace VehicleRentalWeb.Controllers
 {
     public class VehicleController : Controller
     {
-        // Temporary static list (will later move to database)
-        // Replace 'Vehicle' with a concrete class, e.g., 'Car'
-        private static List<Car> vehicles = new List<Car>
-{
-    new Car {
-        Id = 1,
-        Make = "Toyota",
-        Model = "Camry",
-        Year = 2020,
-        Color = "White",
-        Supplier = "Alice",
-        RatePerDay = 50m,
-        ImagePath = "/images/toyota_camry.jpg"
-    },
-    new Car {
-        Id = 2,
-        Make = "Honda",
-        Model = "Civic",
-        Year = 2021,
-        Color = "Blue",
-        Supplier = "Bob",
-        RatePerDay = 45m,
-        ImagePath = "/images/honda_civic.jpg"
-    }
-};
+        private readonly RentalContext _context;
 
-
-        public IActionResult Index()
+        public VehicleController(RentalContext context)
         {
+            _context = context;
+        }
+
+        // ---------------------- INDEX ----------------------
+        public async Task<IActionResult> Index()
+        {
+            // Load all Cars (VehicleType = "Car")
+            var vehicles = await _context.Vehicles
+                .OfType<Car>()
+                .ToListAsync();
+
             return View(vehicles);
         }
 
-        public IActionResult Details(int id)
+        // ---------------------- DETAILS ----------------------
+        public async Task<IActionResult> Details(int id)
         {
-            var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
             if (vehicle == null) return NotFound();
             return View(vehicle);
         }
 
+        // ---------------------- CREATE ----------------------
         [HttpGet]
         public IActionResult Create()
         {
@@ -53,20 +42,54 @@ namespace VehicleRentalWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Car vehicle)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Car vehicle, IFormFile? ImageFile)
         {
-            vehicle.Id = vehicles.Max(v => v.Id) + 1;
-            vehicles.Add(vehicle);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                // Handle file upload if provided
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                    Directory.CreateDirectory(uploadsFolder); // Ensure folder exists
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+
+                    vehicle.ImagePath = "/images/" + uniqueFileName;
+                }
+                else
+                {
+                    // Default if no image uploaded
+                    vehicle.ImagePath = "/images/default_car.jpg";
+                }
+
+                // Ensure EF recognizes it as Car (VehicleType = "Car")
+                _context.Cars.Add(vehicle);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(vehicle);
         }
 
-        public IActionResult Delete(int id)
-        {
-            var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
-            if (vehicle != null)
-                vehicles.Remove(vehicle);
 
-            return RedirectToAction("Index");
+        // ---------------------- DELETE ----------------------
+        public async Task<IActionResult> Delete(int id)
+        {
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle != null)
+            {
+                _context.Cars.Remove(vehicle);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

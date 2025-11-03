@@ -1,97 +1,50 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VehicleRentalWeb.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
+using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly RentalContext _context;
-
-        public CustomerController(RentalContext context)
+        private static List<Customer> customers = new List<Customer>
         {
-            _context = context;
-        }
+            new Customer { Id = 1, Name = "John Smith", Email = "john@example.com", Phone = "555-1234", Address = "123 Elm Street", ImagePath = "/images/toyota_camry_2020.jpg" },
+            new Customer { Id = 2, Name = "Emma Brown", Email = "emma@example.com", Phone = "555-5678", Address = "45 Pine Avenue", ImagePath = "/images/toyota_camry_2020.jpg" }
+        };
 
-        // Display all customers
         public IActionResult Index()
         {
-            var customers = _context.Customers.ToList();
             return View(customers);
         }
 
-        // Show customer details
         public IActionResult Details(int id)
         {
-            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            var customer = customers.FirstOrDefault(c => c.Id == id);
             if (customer == null) return NotFound();
             return View(customer);
         }
 
-        // Add new customer (GET)
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // Add new customer (POST)
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Create(Customer customer)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Customers.Add(customer);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(customer);
+            customer.Id = customers.Max(c => c.Id) + 1;
+            customers.Add(customer);
+            return RedirectToAction("Index");
         }
 
-        // Edit customer (GET)
-        [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            var customer = _context.Customers.Find(id);
-            if (customer == null) return NotFound();
-            return View(customer);
-        }
-
-        // Edit customer (POST)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(Customer customer)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Update(customer);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(customer);
-        }
-
-        // Delete customer (GET)
         public IActionResult Delete(int id)
         {
-            var customer = _context.Customers.Find(id);
-            if (customer == null) return NotFound();
-            return View(customer);
-        }
-
-        // Delete customer (POST)
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var customer = _context.Customers.Find(id);
+            var customer = customers.FirstOrDefault(c => c.Id == id);
             if (customer != null)
-            {
-                _context.Customers.Remove(customer);
-                _context.SaveChanges();
-            }
+                customers.Remove(customer);
+
             return RedirectToAction("Index");
         }
     }

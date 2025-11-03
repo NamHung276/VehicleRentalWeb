@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VehicleRentalWeb.Models
 {
@@ -26,6 +27,7 @@ namespace VehicleRentalWeb.Models
 
         [Display(Name = "Rate Per Day ($)")]
         [Range(0, 10000)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal RatePerDay { get; set; }
 
         [Display(Name = "Image Path")]

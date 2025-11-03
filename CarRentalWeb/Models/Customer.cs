@@ -6,16 +6,19 @@ namespace VehicleRentalWeb.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "Full Name"), StringLength(100)]
+        [Required, StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [EmailAddress]
+        [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Phone]
+        [Required, StringLength(15)]
         public string Phone { get; set; } = string.Empty;
 
-        [Display(Name = "Driver License No."), StringLength(30)]
-        public string LicenseNumber { get; set; } = string.Empty;
+        [StringLength(200)]
+        public string Address { get; set; } = string.Empty;
+
+        [Display(Name = "Profile Image")]
+        public string ImagePath { get; set; } = "/images/default_customer.jpg";
     }
 }

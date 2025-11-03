@@ -7,7 +7,7 @@
 <h2 class="mb-4">@ViewData["Title"]</h2>
 
 <div class="card shadow p-4">
-    <form asp-controller="Vehicle" asp-action="Create" method="post" class="needs-validation" novalidate>
+    <form asp-controller="Vehicle" asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label asp-for="Make" class="form-label"></label>
@@ -46,6 +46,11 @@
             <label asp-for="Supplier" class="form-label"></label>
             <input asp-for="Supplier" class="form-control" />
             <span asp-validation-for="Supplier" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Upload Car Image</label>
+            <input type="file" name="ImageFile" class="form-control" accept="image/*" />
         </div>
 
         <div class="form-check mb-3">

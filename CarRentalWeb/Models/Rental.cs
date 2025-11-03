@@ -8,40 +8,24 @@ namespace VehicleRentalWeb.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [Display(Name = "Customer")]
-        public int CustomerId { get; set; }
+        [Required, Display(Name = "Customer Name")]
+        public string CustomerName { get; set; } = string.Empty;
 
-        [ForeignKey("CustomerId")]
-        public Customer? Customer { get; set; }
+        [Required, Display(Name = "Vehicle Name")]
+        public string VehicleName { get; set; } = string.Empty;
 
-        [Required]
-        [Display(Name = "Vehicle")]
-        public int VehicleId { get; set; }
-
-        [ForeignKey("VehicleId")]
-        public Vehicle? Vehicle { get; set; }
-
-        [Display(Name = "Start Date")]
-        [DataType(DataType.Date)]
+        [Required, DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
 
-        [Display(Name = "End Date")]
-        [DataType(DataType.Date)]
+        [Required, DataType(DataType.Date)]
         public DateTime EndDate { get; set; }
 
+        [Range(0, 10000)]
         [Display(Name = "Total Cost ($)")]
-        [Range(0, 999999)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalCost { get; set; }
 
-        // 🧮 Calculates total cost automatically
-        public void CalculateTotalCost()
-        {
-            if (Vehicle != null && EndDate > StartDate)
-            {
-                int days = (EndDate - StartDate).Days;
-                TotalCost = Vehicle.CalculateCost(days);
-            }
-        }
+        [Display(Name = "Is Active")]
+        public bool IsActive { get; set; }
     }
 }
