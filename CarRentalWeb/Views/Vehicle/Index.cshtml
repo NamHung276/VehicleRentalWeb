@@ -6,9 +6,20 @@
 
 <h2 class="text-center mb-4 fw-bold text-primary">@ViewData["Title"]</h2>
 
+<!-- Action Buttons Section -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["Message"]
+    </div>
+}
+)
+
 <div class="text-center mb-4">
     <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success btn-lg me-2">Add New Vehicle</a>
     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+    <a asp-controller="Vehicle" asp-action="Archived" class="btn btn-outline-danger btn-lg">View Archived</a>
+
 </div>
 
 <!-- Vehicle Grid Section -->

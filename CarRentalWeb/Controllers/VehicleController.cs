@@ -107,5 +107,34 @@ namespace VehicleRentalWeb.Controllers
             TempData["Message"] = "Vehicle removed successfully.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ---------------------- ARCHIVED VEHICLES ----------------------
+        public async Task<IActionResult> Archived()
+        {
+            // Load vehicles that were soft-deleted
+            var archivedVehicles = await _context.Vehicles
+                .OfType<Car>()
+                .Where(v => v.IsRemoved)
+                .ToListAsync();
+
+            return View(archivedVehicles);
+        }
+
+        // ---------------------- RESTORE VEHICLE ----------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null)
+                return NotFound();
+
+            vehicle.IsRemoved = false;
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"{vehicle.Make} {vehicle.Model} restored successfully.";
+            return RedirectToAction(nameof(Archived));
+        }
+
     }
 }

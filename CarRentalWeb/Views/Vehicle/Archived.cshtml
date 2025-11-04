@@ -1,0 +1,49 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Vehicle>
+
+@{
+    ViewData["Title"] = "Archived Vehicles";
+}
+
+<h2 class="text-center mb-4 text-danger fw-bold">@ViewData["Title"]</h2>
+
+<div class="text-center mb-4">
+    <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-primary btn-lg me-2">Back to Active List</a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["Message"]
+    </div>
+}
+
+<div class="row row-cols-1 row-cols-md-3 g-4 car-grid">
+    @foreach (var car in Model)
+    {
+        <div class="col">
+            <div class="car-card shadow-sm border border-danger">
+                <img src="@(string.IsNullOrEmpty(car.ImagePath) ? "/images/default_car.jpg" : car.ImagePath)"
+                     alt="@car.Make @car.Model"
+                     class="car-image" />
+
+                <div class="car-info">
+                    <h5 class="car-name text-muted">@car.Make @car.Model</h5>
+                    <p class="car-details">@car.Year • @car.Color</p>
+                    <p class="car-details">Supplier: @car.Supplier</p>
+                    <div class="car-footer d-flex justify-content-between align-items-center">
+                        <span class="text-danger">Removed</span>
+                        <form asp-controller="Vehicle" asp-action="Restore" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@car.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Restore</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center mt-5">No archived vehicles found.</div>
+}
