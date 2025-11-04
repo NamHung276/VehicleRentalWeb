@@ -35,5 +35,8 @@ namespace VehicleRentalWeb.Models
 
         // Polymorphic cost calculation
         public abstract decimal CalculateCost(int days);
+
+        public bool IsRemoved { get; set; } = false;
+
     }
 }

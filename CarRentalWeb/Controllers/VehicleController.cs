@@ -21,6 +21,7 @@ namespace VehicleRentalWeb.Controllers
             // Load all Cars (VehicleType = "Car")
             var vehicles = await _context.Vehicles
                 .OfType<Car>()
+                .Where(v => !v.IsRemoved)
                 .ToListAsync();
 
             return View(vehicles);
@@ -80,15 +81,30 @@ namespace VehicleRentalWeb.Controllers
         }
 
 
-        // ---------------------- DELETE ----------------------
+        // ---------------------- DELETE (Soft Delete) ----------------------
+        [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
             var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
-            if (vehicle != null)
-            {
-                _context.Cars.Remove(vehicle);
-                await _context.SaveChangesAsync();
-            }
+            if (vehicle == null)
+                return NotFound();
+
+            return View(vehicle); // Show confirmation page
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null)
+                return NotFound();
+
+            // Mark as removed (soft delete)
+            vehicle.IsRemoved = true;
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Vehicle removed successfully.";
             return RedirectToAction(nameof(Index));
         }
     }

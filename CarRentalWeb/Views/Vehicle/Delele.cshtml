@@ -1,0 +1,24 @@
+﻿@model VehicleRentalWeb.Models.Car
+
+@{
+    ViewData["Title"] = "Delete Vehicle";
+}
+
+<h2 class="mb-4 text-danger">Delete Vehicle</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to remove this vehicle?
+</div>
+
+<div class="card shadow-sm mb-4 p-3">
+    <h4>@Model.Make @Model.Model (@Model.Year)</h4>
+    <p><strong>Color:</strong> @Model.Color</p>
+    <p><strong>Supplier:</strong> @Model.Supplier</p>
+    <p><strong>Rate per day:</strong> $@Model.RatePerDay</p>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger me-2">Confirm Remove</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
