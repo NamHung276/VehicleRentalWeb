@@ -20,5 +20,8 @@ namespace VehicleRentalWeb.Models
 
         [Display(Name = "Profile Image")]
         public string ImagePath { get; set; } = "/images/default_customer.jpg";
+
+        [Display(Name = "Registration Type")]
+        public RegistrationType RegistrationType { get; set; } // Enum used here
     }
 }

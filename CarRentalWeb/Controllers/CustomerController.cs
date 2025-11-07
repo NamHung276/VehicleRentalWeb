@@ -9,8 +9,8 @@ namespace VehicleRentalWeb.Controllers
     {
         private static List<Customer> customers = new List<Customer>
         {
-            new Customer { Id = 1, Name = "John Smith", Email = "john@example.com", Phone = "555-1234", Address = "123 Elm Street", ImagePath = "/images/toyota_camry_2020.jpg" },
-            new Customer { Id = 2, Name = "Emma Brown", Email = "emma@example.com", Phone = "555-5678", Address = "45 Pine Avenue", ImagePath = "/images/toyota_camry_2020.jpg" }
+            new Customer { Id = 1, Name = "John Smith", Email = "john@example.com", Phone = "555-1234", Address = "123 Elm Street", ImagePath = "/images/default_customer.jpg" },
+            new Customer { Id = 2, Name = "Emma Brown", Email = "emma@example.com", Phone = "555-5678", Address = "45 Pine Avenue", ImagePath = "/images/default_customer.jpg" }
         };
 
         public IActionResult Index()

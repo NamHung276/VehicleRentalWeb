@@ -38,8 +38,7 @@
                     <p class="car-details">Supplier: @car.Supplier</p>
                     <div class="car-footer d-flex justify-content-between align-items-center">
                         <span class="price">$@car.RatePerDay.ToString("0.00") / day</span>
-                        <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@car.Id" class="btn btn-sm btn-outline-primary">View</a>
-                        <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@car.Id" class="btn btn-sm btn-outline-danger ms-1">Delete</a>
+                        <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@car.Id" class="btn btn-sm btn-outline-primary">View</a>                        
                     </div>
                 </div>
             </div>

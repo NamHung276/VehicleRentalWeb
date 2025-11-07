@@ -42,6 +42,13 @@
             <span asp-validation-for="ImagePath" class="text-danger"></span>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="RegistrationType" class="form-label"></label>
+            <select asp-for="RegistrationType" class="form-select"
+                    asp-items="Html.GetEnumSelectList<VehicleRentalWeb.Models.RegistrationType>()"></select>
+            <span asp-validation-for="RegistrationType" class="text-danger"></span>
+        </div>
+
         <div class="d-flex justify-content-end">
             <a asp-controller="Customer" asp-action="Index" class="btn btn-secondary me-2">Cancel</a>
             <button type="submit" class="btn btn-primary">Save Customer</button>

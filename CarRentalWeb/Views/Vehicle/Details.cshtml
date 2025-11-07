@@ -22,8 +22,13 @@
             <p><strong>Rate Per Day:</strong> $@Model.RatePerDay.ToString("0.00")</p>
             <p><strong>Available:</strong> @(Model.IsAvailable ? "Yes" : "No")</p>
 
-            <div class="mt-4">
+            <div class="mt-4 d-flex justify-content-between align-items-center">
                 <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+
+                <div class="d-flex gap-2">
+                    <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+                    <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                </div>
             </div>
         </div>
     </div>

@@ -25,6 +25,9 @@ namespace VehicleRentalWeb.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalCost { get; set; }
 
+        [Display(Name = "Rental Source")]
+        public RentalSource Source { get; set; }   // Enum used here
+
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; }
     }

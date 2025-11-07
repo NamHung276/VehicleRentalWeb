@@ -136,5 +136,72 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction(nameof(Archived));
         }
 
+        // ---------------------- EDIT (GET) ----------------------
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null) return NotFound();
+            return View(vehicle);
+        }
+
+        // ---------------------- EDIT (POST) ----------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Car formModel, IFormFile? ImageFile)
+        {
+            if (id != formModel.Id) return BadRequest();
+
+            if (!ModelState.IsValid)
+            {
+                return View(formModel);
+            }
+
+            var vehicle = await _context.Cars.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null) return NotFound();
+
+            // Update details
+            vehicle.Make = formModel.Make;
+            vehicle.Model = formModel.Model;
+            vehicle.Year = formModel.Year;
+            vehicle.Color = formModel.Color;
+            vehicle.Supplier = formModel.Supplier;
+            vehicle.RatePerDay = formModel.RatePerDay;
+            vehicle.IsAvailable = formModel.IsAvailable;
+            vehicle.Seats = formModel.Seats;
+            vehicle.FuelType = formModel.FuelType;
+
+            // Handle optional image upload
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Delete old file if not default
+                if (!string.IsNullOrEmpty(vehicle.ImagePath) && !vehicle.ImagePath.Contains("default_car.jpg"))
+                {
+                    string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", vehicle.ImagePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                    if (System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                vehicle.ImagePath = "/images/" + uniqueFileName;
+            }
+
+            _context.Update(vehicle);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Vehicle updated successfully!";
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }
