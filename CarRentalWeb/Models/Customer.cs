@@ -22,6 +22,10 @@ namespace VehicleRentalWeb.Models
         public string ImagePath { get; set; } = "/images/default_customer.jpg";
 
         [Display(Name = "Registration Type")]
-        public RegistrationType RegistrationType { get; set; } // Enum used here
+        public RegistrationType RegistrationType { get; set; }
+
+        // This is the foreign key side
+        public int? UserId { get; set; }
+        public User? User { get; set; }
     }
 }

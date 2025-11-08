@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace VehicleRentalWeb.Models
 {
@@ -19,17 +17,26 @@ namespace VehicleRentalWeb.Models
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Rental> Rentals { get; set; }
+        public DbSet<User> Users { get; set; }
 
-        // Optional: Inheritance mapping for Vehicle hierarchy
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Vehicle inheritance
             modelBuilder.Entity<Vehicle>()
                 .HasDiscriminator<string>("VehicleType")
                 .HasValue<Car>("Car")
                 .HasValue<Bike>("Bike")
                 .HasValue<Truck>("Truck");
+
+            // Explicitly configure one-to-one relationship between User and Customer
+            modelBuilder.Entity<Customer>()
+                .HasOne(c => c.User)
+                .WithOne(u => u.Customer)
+                .HasForeignKey<Customer>(c => c.UserId)
+                .OnDelete(DeleteBehavior.SetNull); // optional, avoids cascade delete loops
         }
+
     }
 }
