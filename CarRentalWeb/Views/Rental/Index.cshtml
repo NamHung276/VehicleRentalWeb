@@ -17,6 +17,7 @@
             <th>ID</th>
             <th>Customer</th>
             <th>Vehicle</th>
+            <th>Rental Source</th>
             <th>Start Date</th>
             <th>End Date</th>
             <th>Total Cost ($)</th>
@@ -29,8 +30,9 @@
         {
             <tr>
                 <td>@rental.Id</td>
-                <td>@rental.CustomerName</td>
-                <td>@rental.VehicleName</td>
+                <td>@rental.Customer?.Name</td>
+                <td>@rental.VehicleId</td>
+                <td>@rental.Source</td>
                 <td>@rental.StartDate.ToShortDateString()</td>
                 <td>@rental.EndDate.ToShortDateString()</td>
                 <td>@rental.TotalCost.ToString("0.00")</td>

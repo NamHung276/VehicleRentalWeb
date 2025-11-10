@@ -30,12 +30,19 @@ namespace VehicleRentalWeb.Models
                 .HasValue<Bike>("Bike")
                 .HasValue<Truck>("Truck");
 
-            // Explicitly configure one-to-one relationship between User and Customer
+            // User–Customer (1-to-1)
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.User)
                 .WithOne(u => u.Customer)
                 .HasForeignKey<Customer>(c => c.UserId)
-                .OnDelete(DeleteBehavior.SetNull); // optional, avoids cascade delete loops
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Customer–Rental (1-to-many)
+            modelBuilder.Entity<Rental>()
+                .HasOne(r => r.Customer)
+                .WithMany()
+                .HasForeignKey(r => r.CustomerId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
     }

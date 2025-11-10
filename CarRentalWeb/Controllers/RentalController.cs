@@ -1,44 +1,75 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VehicleRentalWeb.Models;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace VehicleRentalWeb.Controllers
 {
     public class RentalController : Controller
     {
-        private static List<Rental> rentals = new List<Rental>
+        private readonly RentalContext _context;
+
+        public RentalController(RentalContext context)
         {
-            new Rental { Id = 1, CustomerName = "Alice", VehicleName = "Toyota Camry", StartDate = DateTime.Today.AddDays(-3), EndDate = DateTime.Today, TotalCost = 150, IsActive = false },
-            new Rental { Id = 2, CustomerName = "Bob", VehicleName = "Honda Civic", StartDate = DateTime.Today, EndDate = DateTime.Today.AddDays(2), TotalCost = 90, IsActive = true }
-        };
+            _context = context;
+        }
 
-        public IActionResult Index() => View(rentals);
+        // GET: /Rental
+        public IActionResult Index()
+        {
+            var rentals = _context.Rentals
+                .Include(r => r.Customer) // Include Customer details
+                .ToList();
+            return View(rentals);
+        }
 
+        // GET: /Rental/Details/5
         public IActionResult Details(int id)
         {
-            var rental = rentals.FirstOrDefault(r => r.Id == id);
-            if (rental == null) return NotFound();
+            var rental = _context.Rentals
+                .Include(r => r.Customer)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (rental == null)
+                return NotFound();
+
             return View(rental);
         }
 
         [HttpGet]
-        public IActionResult Create() => View();
+        public IActionResult Create()
+        {
+            ViewBag.Customers = _context.Customers.ToList();
+            ViewBag.Vehicles = _context.Vehicles.ToList();
+            return View();
+        }
+
 
         [HttpPost]
         public IActionResult Create(Rental rental)
         {
-            rental.Id = rentals.Max(r => r.Id) + 1;
-            rentals.Add(rental);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                _context.Rentals.Add(rental);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Customers = _context.Customers.ToList();
+            ViewBag.Vehicles = _context.Vehicles.ToList();
+            return View(rental);
         }
 
+        // GET: /Rental/Delete/5
         public IActionResult Delete(int id)
         {
-            var rental = rentals.FirstOrDefault(r => r.Id == id);
-            if (rental != null)
-                rentals.Remove(rental);
-            return RedirectToAction("Index");
+            var rental = _context.Rentals.Find(id);
+            if (rental == null)
+                return NotFound();
+
+            _context.Rentals.Remove(rental);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

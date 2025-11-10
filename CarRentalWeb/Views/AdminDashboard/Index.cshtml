@@ -1,0 +1,82 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Rental>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<div class="row text-center mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.TotalUsers</h4>
+                <p>Users</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.TotalCustomers</h4>
+                <p>Customers</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-warning text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.TotalVehicles</h4>
+                <p>Vehicles</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.ActiveRentals</h4>
+                <p>Active Rentals</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5 mb-3">Recent Rentals</h3>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rental in Model)
+        {
+            <tr>
+                <td>@rental.Id</td>
+                <td>@rental.Customer?.Name</td>
+                <td>@rental.VehicleName</td>
+                <td>@rental.StartDate.ToShortDateString()</td>
+                <td>@rental.EndDate.ToShortDateString()</td>
+                <td>
+                    @if (rental.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Completed</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

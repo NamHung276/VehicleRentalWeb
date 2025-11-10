@@ -53,6 +53,12 @@
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
+                        @if (Context.Session.GetString("Role") == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a>
+                            </li>
+                        }
 
                     </ul>
                 </div>

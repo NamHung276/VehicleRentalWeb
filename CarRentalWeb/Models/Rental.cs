@@ -8,11 +8,16 @@ namespace VehicleRentalWeb.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "Customer Name")]
-        public string CustomerName { get; set; } = string.Empty;
+        // Foreign Key
+        [Display(Name = "Customer")]
+        public int? CustomerId { get; set; }
 
-        [Required, Display(Name = "Vehicle Name")]
-        public string VehicleName { get; set; } = string.Empty;
+        [ForeignKey("CustomerId")]
+        public Customer? Customer { get; set; }
+
+        [Display(Name = "Vehicle")]
+        public int VehicleId { get; set; }
+        public Vehicle? Vehicle { get; set; }
 
         [Required, DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
@@ -26,7 +31,7 @@ namespace VehicleRentalWeb.Models
         public decimal TotalCost { get; set; }
 
         [Display(Name = "Rental Source")]
-        public RentalSource Source { get; set; }   // Enum used here
+        public RentalSource Source { get; set; }
 
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; }
