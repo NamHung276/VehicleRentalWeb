@@ -26,7 +26,6 @@ namespace VehicleRentalWeb.Models
         public DateTime EndDate { get; set; }
 
         [Range(0, 10000)]
-        [Display(Name = "Total Cost ($)")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalCost { get; set; }
 
