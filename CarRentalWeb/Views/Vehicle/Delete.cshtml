@@ -1,24 +1,84 @@
-﻿@model VehicleRentalWeb.Models.Car
+﻿@model VehicleRentalWeb.Models.Vehicle
 
 @{
     ViewData["Title"] = "Delete Vehicle";
 }
 
-<h2 class="mb-4 text-danger">Delete Vehicle</h2>
+<div class="container mt-4">
+    <h2 class="fw-bold text-danger mb-4">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Vehicle
+    </h2>
 
-<div class="alert alert-warning">
-    Are you sure you want to remove this vehicle?
+    <div class="alert alert-warning shadow-sm">
+        <i class="bi bi-info-circle me-2"></i>
+        Are you sure you want to <strong>remove this vehicle</strong>?
+        It will be moved to <strong>Archived</strong>, not deleted permanently.
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="row g-0 align-items-center">
+            <div class="col-md-4">
+                <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default_car.jpg" : Model.ImagePath)"
+                     alt="@Model.Make @Model.Model"
+                     class="img-fluid rounded-start" style="object-fit: cover; height: 220px;" />
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-2">@Model.Make @Model.Model (@Model.Year)</h4>
+                    <p class="text-muted mb-1">@Model.Color • Supplier: @Model.Supplier</p>
+                    <p class="text-muted mb-1">
+                        <i class="bi bi-cash-coin text-success"></i>
+                        $@Model.RatePerDay.ToString("0.00") / day
+                    </p>
+
+                    @if (Model is VehicleRentalWeb.Models.Car car)
+                    {
+                        <p class="mb-0 small">
+                            <strong>Seats:</strong> @car.Seats |
+                            <strong>Transmission:</strong> @car.Transmission |
+                            <strong>Fuel:</strong> @car.FuelType
+                        </p>
+                        <p class="small mb-0">
+                            <strong>Luggage:</strong> @car.Luggage |
+                            <strong>AC:</strong> @(car.HasAC ? "Yes" : "No") |
+                            <strong>CarPlay:</strong> @(car.HasCarPlay ? "Yes" : "No")
+                        </p>
+                    }
+
+                    @if (Model is VehicleRentalWeb.Models.Bike bike)
+                    {
+                        <p class="mb-0 small">
+                            <strong>Engine:</strong> @bike.EngineCC cc |
+                            <strong>Electric:</strong> @(bike.IsElectric ? "Yes" : "No") |
+                            <strong>Transmission:</strong> @bike.Transmission
+                        </p>
+                    }
+
+                    @if (Model is VehicleRentalWeb.Models.Truck truck)
+                    {
+                        <p class="mb-0 small">
+                            <strong>Capacity:</strong> @truck.CapacityInTons tons |
+                            <strong>Transmission:</strong> @truck.Transmission |
+                            <strong>AC:</strong> @(truck.HasAC ? "Yes" : "No")
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIXED FORM -->
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="d-flex justify-content-end">
+            <a asp-action="Index" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left-circle"></i> Cancel
+            </a>
+
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Confirm Remove
+            </button>
+        </div>
+    </form>
 </div>
-
-<div class="card shadow-sm mb-4 p-3">
-    <h4>@Model.Make @Model.Model (@Model.Year)</h4>
-    <p><strong>Color:</strong> @Model.Color</p>
-    <p><strong>Supplier:</strong> @Model.Supplier</p>
-    <p><strong>Rate per day:</strong> $@Model.RatePerDay</p>
-</div>
-
-<form asp-action="Delete">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger me-2">Confirm Remove</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>

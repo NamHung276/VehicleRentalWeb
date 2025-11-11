@@ -1,77 +1,161 @@
-﻿@model VehicleRentalWeb.Models.Car
+﻿@model VehicleRentalWeb.Models.Vehicle
 
 @{
     ViewData["Title"] = "Edit Vehicle";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="fw-bold text-primary mb-4">
+        <i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]
+    </h2>
 
-<div class="card shadow p-4">
-    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-        <input type="hidden" asp-for="Id" />
+    <div class="card shadow-sm p-4 border-0">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <input type="hidden" asp-for="Id" />
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label asp-for="Make" class="form-label"></label>
-                <input asp-for="Make" class="form-control" />
-                <span asp-validation-for="Make" class="text-danger"></span>
+            <!-- === BASIC INFO === -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Make" class="form-label fw-semibold"></label>
+                    <input asp-for="Make" class="form-control" />
+                    <span asp-validation-for="Make" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Model" class="form-label fw-semibold"></label>
+                    <input asp-for="Model" class="form-control" />
+                    <span asp-validation-for="Model" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label asp-for="Model" class="form-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label asp-for="Year" class="form-label"></label>
-                <input asp-for="Year" class="form-control" />
-                <span asp-validation-for="Year" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label asp-for="Color" class="form-label"></label>
-                <input asp-for="Color" class="form-control" />
-                <span asp-validation-for="Color" class="text-danger"></span>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Year" class="form-label fw-semibold"></label>
+                    <input asp-for="Year" class="form-control" />
+                    <span asp-validation-for="Year" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Color" class="form-label fw-semibold"></label>
+                    <input asp-for="Color" class="form-control" />
+                    <span asp-validation-for="Color" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="RatePerDay" class="form-label fw-semibold"></label>
+                    <input asp-for="RatePerDay" class="form-control" />
+                    <span asp-validation-for="RatePerDay" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-4 mb-3">
-                <label asp-for="RatePerDay" class="form-label"></label>
-                <input asp-for="RatePerDay" class="form-control" />
-                <span asp-validation-for="RatePerDay" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Supplier" class="form-label"></label>
-            <input asp-for="Supplier" class="form-control" />
-            <span asp-validation-for="Supplier" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Current Image</label>
-            <div class="mb-2">
-                <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? Url.Content("~/images/default_car.jpg") : Url.Content(Model.ImagePath))"
-                     alt="@Model.Make @Model.Model"
-                     class="img-thumbnail" style="max-width:260px;" />
+            <div class="mb-3">
+                <label asp-for="Supplier" class="form-label fw-semibold"></label>
+                <input asp-for="Supplier" class="form-control" />
+                <span asp-validation-for="Supplier" class="text-danger"></span>
             </div>
 
-            <label class="form-label">Upload New Image (optional)</label>
-            <input type="file" name="ImageFile" class="form-control" accept="image/*" />
-        </div>
+            <!-- === DYNAMIC TYPE-SPECIFIC FIELDS === -->
+            @if (Model is VehicleRentalWeb.Models.Car car)
+            {
+                <h5 class="text-secondary mt-4 mb-3"><i class="bi bi-car-front-fill me-2"></i>Car Specifications</h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="@car.Seats" class="form-label fw-semibold">Seats</label>
+                        <input asp-for="@car.Seats" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="@car.FuelType" class="form-label fw-semibold">Fuel Type</label>
+                        <input asp-for="@car.FuelType" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="@car.Transmission" class="form-label fw-semibold">Transmission</label>
+                        <input asp-for="@car.Transmission" class="form-control" />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="@car.Luggage" class="form-label fw-semibold">Luggage</label>
+                        <input asp-for="@car.Luggage" class="form-control" />
+                    </div>
+                </div>
 
-        <div class="form-check mb-3">
-            <input asp-for="IsAvailable" class="form-check-input" />
-            <label asp-for="IsAvailable" class="form-check-label"></label>
-        </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 form-check">
+                        <input asp-for="@car.HasAC" class="form-check-input" />
+                        <label asp-for="@car.HasAC" class="form-check-label fw-semibold">Air Conditioning</label>
+                    </div>
+                    <div class="col-md-4 form-check">
+                        <input asp-for="@car.HasCarPlay" class="form-check-input" />
+                        <label asp-for="@car.HasCarPlay" class="form-check-label fw-semibold">CarPlay / Android Auto</label>
+                    </div>
+                </div>
+            }
+            else if (Model is VehicleRentalWeb.Models.Bike bike)
+            {
+                <h5 class="text-secondary mt-4 mb-3"><i class="bi bi-bicycle me-2"></i>Bike Specifications</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@bike.EngineCC" class="form-label fw-semibold">Engine (CC)</label>
+                        <input asp-for="@bike.EngineCC" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@bike.Transmission" class="form-label fw-semibold">Transmission</label>
+                        <input asp-for="@bike.Transmission" class="form-control" />
+                    </div>
+                    <div class="col-md-4 form-check mt-4">
+                        <input asp-for="@bike.IsElectric" class="form-check-input" />
+                        <label asp-for="@bike.IsElectric" class="form-check-label fw-semibold">Electric Bike</label>
+                    </div>
+                </div>
+            }
+            else if (Model is VehicleRentalWeb.Models.Truck truck)
+            {
+                <h5 class="text-secondary mt-4 mb-3"><i class="bi bi-truck-front me-2"></i>Truck Specifications</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@truck.CapacityInTons" class="form-label fw-semibold">Capacity (Tons)</label>
+                        <input asp-for="@truck.CapacityInTons" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@truck.Transmission" class="form-label fw-semibold">Transmission</label>
+                        <input asp-for="@truck.Transmission" class="form-control" />
+                    </div>
+                    <div class="col-md-4 form-check mt-4">
+                        <input asp-for="@truck.HasAC" class="form-check-input" />
+                        <label asp-for="@truck.HasAC" class="form-check-label fw-semibold">Air Conditioning</label>
+                    </div>
+                </div>
+            }
 
-        <div class="d-flex justify-content-end">
-            <a asp-controller="Vehicle" asp-action="Index" class="btn btn-secondary me-2">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-    </form>
+            <!-- === IMAGE === -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Current Image</label>
+                <div class="mb-2">
+                    <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? Url.Content("~/images/default_car.jpg") : Url.Content(Model.ImagePath))"
+                         alt="@Model.Make @Model.Model"
+                         class="img-thumbnail" style="max-width:250px;" />
+                </div>
+
+                <label class="form-label fw-semibold">Upload New Image (optional)</label>
+                <input type="file" name="ImageFile" class="form-control" accept="image/*" />
+            </div>
+
+            <!-- === STATUS === -->
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label fw-semibold"></label>
+                <select asp-for="Status" class="form-select">
+                    <option>Available</option>
+                    <option>Rented</option>
+                    <option>In Service</option>
+                </select>
+            </div>
+
+            <!-- === ACTION BUTTONS === -->
+            <div class="d-flex justify-content-end">
+                <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left-circle"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

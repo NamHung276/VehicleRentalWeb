@@ -4,49 +4,185 @@
     ViewData["Title"] = "Vehicle Catalog";
 }
 
-<h2 class="text-center mb-4 fw-bold text-primary">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="fw-bold text-primary text-center mb-4">
+        <i class="bi bi-car-front-fill me-2"></i>Vehicle Catalog
+    </h2>
 
-<!-- Action Buttons Section -->
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success text-center">
-        @TempData["Message"]
-    </div>
-}
-)
-
-<div class="text-center mb-4">
-    <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success btn-lg me-2">Add New Vehicle</a>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">Back to Home</a>
-    <a asp-controller="Vehicle" asp-action="Archived" class="btn btn-outline-danger btn-lg">View Archived</a>
-
-</div>
-
-<!-- Vehicle Grid Section -->
-<div class="row row-cols-1 row-cols-md-3 g-4 car-grid">
-    @foreach (var car in Model)
+    <!-- ====== MESSAGE ALERT ====== -->
+    @if (TempData["Message"] != null)
     {
-        <div class="col">
-            <div class="car-card shadow-sm">
-                <img src="@(string.IsNullOrEmpty(car.ImagePath) ? "/images/default_car.jpg" : car.ImagePath)"
-                     alt="@car.Make @car.Model"
-                     class="car-image" />
+        <div class="alert alert-success text-center">
+            @TempData["Message"]
+        </div>
+    }
 
-                <div class="car-info">
-                    <h5 class="car-name">@car.Make @car.Model</h5>
-                    <p class="car-details">@car.Year • @car.Color</p>
-                    <p class="car-details">Supplier: @car.Supplier</p>
-                    <div class="car-footer d-flex justify-content-between align-items-center">
-                        <span class="price">$@car.RatePerDay.ToString("0.00") / day</span>
-                        <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@car.Id" class="btn btn-sm btn-outline-primary">View</a>                        
+    <!-- ====== FILTER PANEL ====== -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-funnel-fill text-primary"></i> Filter</h5>
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="🔍 Search make or model..." />
+            </div>
+
+            <div class="col-md-2">
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    @foreach (var type in ViewBag.VehicleTypes)
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="fuelType" class="form-select">
+                    <option value="">Fuel Type</option>
+                    @foreach (var fuel in ViewBag.FuelTypes)
+                    {
+                        <option value="@fuel">@fuel</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">Status</option>
+                    @foreach (var status in ViewBag.StatusOptions)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="category" class="form-select">
+                    <option value="">Category</option>
+                    <optgroup label="Cars">
+                        @foreach (var t in ViewBag.CarTypes)
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Bikes">
+                        @foreach (var t in ViewBag.BikeTypes)
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Trucks">
+                        @foreach (var t in ViewBag.TruckTypes)
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Apply
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ====== ACTION BUTTONS ====== -->
+    <div class="text-center mb-4">
+        <a asp-controller="Vehicle" asp-action="Create" class="btn btn-success btn-lg me-2">
+            <i class="bi bi-plus-circle"></i> Add Vehicle
+        </a>
+        <a asp-controller="Vehicle" asp-action="Archived" class="btn btn-outline-danger btn-lg">
+            <i class="bi bi-archive-fill"></i> Archived
+        </a>
+    </div>
+
+    <!-- ====== VEHICLE DISPLAY GRID ====== -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var v in Model)
+        {
+            if (v.IsRemoved) continue;
+
+            string typeIcon = v switch
+            {
+                VehicleRentalWeb.Models.Car => "🚗",
+                VehicleRentalWeb.Models.Bike => "🏍️",
+                VehicleRentalWeb.Models.Truck => "🚚",
+                _ => "🚘"
+            };
+
+            string badgeClass = v.IsAvailable ? "bg-success" :
+            (v.Status == "Rented" ? "bg-warning text-dark" : "bg-secondary");
+            string badgeText = v.Status ?? "Unknown";
+
+            <div class="col">
+                <div class="card shadow-sm h-100 border-0 rounded-3 overflow-hidden">
+                    <div class="position-relative">
+                        <img src="@(string.IsNullOrEmpty(v.ImagePath) ? "/images/default_car.jpg" : v.ImagePath)"
+                             alt="@v.Make @v.Model"
+                             class="card-img-top" style="height:200px; object-fit:cover;" />
+                        <span class="badge @badgeClass position-absolute top-0 end-0 m-2">@badgeText</span>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="fw-bold">@typeIcon @v.Make @v.Model</h5>
+                        <p class="text-muted small mb-1">@v.Year • @v.Color</p>
+
+                        @if (v is VehicleRentalWeb.Models.Car car)
+                        {
+                            <p class="small mb-1"><strong>Seats:</strong> @car.Seats | <strong>Luggage:</strong> @car.Luggage</p>
+                            <p class="small mb-1"><strong>Gear:</strong> @car.Transmission | <strong>Fuel:</strong> @car.FuelType</p>
+                            <p class="small text-muted">
+                                <i class="bi bi-wifi"></i> CarPlay: @(car.HasCarPlay ? "Yes" : "No") |
+                                <i class="bi bi-snow"></i> A/C: @(car.HasAC ? "Yes" : "No")
+                            </p>
+                        }
+                        else if (v is VehicleRentalWeb.Models.Bike bike)
+                        {
+                            <p class="small mb-1">
+                                <strong>Engine:</strong> @bike.EngineCC cc
+                                @if (bike.GetType().GetProperty("BikeType") != null)
+                                {
+                                    <text>| <strong>Type:</strong> @((dynamic)bike).BikeType</text>
+                                }
+                            </p>
+                            <p class="small mb-1"><strong>Transmission:</strong> @bike.Transmission | <strong>Electric:</strong> @(bike.IsElectric ? "Yes" : "No")</p>
+                        }
+                        else if (v is VehicleRentalWeb.Models.Truck truck)
+                        {
+                            <p class="small mb-1"><strong>Capacity:</strong> @truck.CapacityInTons tons | <strong>Transmission:</strong> @truck.Transmission</p>
+                            <p class="small text-muted"><strong>AC:</strong> @(truck.HasAC ? "Yes" : "No")</p>
+                        }
+
+                        <!-- Price -->
+                        <p class="fw-bold text-success mt-2 mb-1">$@v.RatePerDay.ToString("0.00") / day</p>
+
+                        <!-- Ratings -->
+                        <p class="text-warning small mb-0">
+                            ⭐⭐⭐⭐☆ <span class="text-muted">(124 reviews)</span>
+                        </p>
+                    </div>
+
+                    <div class="card-footer text-center bg-white border-0 pb-3">
+                        <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@v.Id" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                        <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@v.Id" class="btn btn-outline-warning btn-sm me-2">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@v.Id" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
                     </div>
                 </div>
             </div>
+        }
+    </div>
+
+    @if (!Model.Any(v => !v.IsRemoved))
+    {
+        <div class="alert alert-info text-center mt-5">
+            <i class="bi bi-inbox"></i> No active vehicles found.
         </div>
     }
 </div>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info text-center mt-5">No vehicles available at the moment.</div>
-}

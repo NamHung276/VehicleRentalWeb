@@ -14,36 +14,23 @@ namespace VehicleRentalWeb.Controllers
             _context = context;
         }
 
-        // GET: /Rental
         public IActionResult Index()
         {
             var rentals = _context.Rentals
-                .Include(r => r.Customer) // Include Customer details
-                .ToList();
-            return View(rentals);
-        }
-
-        // GET: /Rental/Details/5
-        public IActionResult Details(int id)
-        {
-            var rental = _context.Rentals
                 .Include(r => r.Customer)
-                .FirstOrDefault(r => r.Id == id);
+                .Include(r => r.Vehicle)
+                .ToList();
 
-            if (rental == null)
-                return NotFound();
-
-            return View(rental);
+            return View(rentals);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Customers = _context.Customers.ToList();
             ViewBag.Vehicles = _context.Vehicles.ToList();
+            ViewBag.Customers = _context.Customers.ToList();
             return View();
         }
-
 
         [HttpPost]
         public IActionResult Create(Rental rental)
@@ -52,24 +39,12 @@ namespace VehicleRentalWeb.Controllers
             {
                 _context.Rentals.Add(rental);
                 _context.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Customers = _context.Customers.ToList();
             ViewBag.Vehicles = _context.Vehicles.ToList();
+            ViewBag.Customers = _context.Customers.ToList();
             return View(rental);
-        }
-
-        // GET: /Rental/Delete/5
-        public IActionResult Delete(int id)
-        {
-            var rental = _context.Rentals.Find(id);
-            if (rental == null)
-                return NotFound();
-
-            _context.Rentals.Remove(rental);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

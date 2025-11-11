@@ -4,29 +4,44 @@
     ViewData["Title"] = "Add New Rental";
 }
 
+<!-- Bootstrap Select (only load once, in <head> ideally or before </body>) -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" />
+
 <h2 class="mb-4">@ViewData["Title"]</h2>
 
 <div class="card shadow p-4">
     <form asp-controller="Rental" asp-action="Create" method="post" class="needs-validation" novalidate>
-        <!-- Customer Dropdown -->
-        <div class="col-md-6 mb-3">
-            <label asp-for="CustomerId" class="form-label">Customer</label>
-            <select asp-for="CustomerId" class="form-select"
-                    asp-items="@(new SelectList(ViewBag.Customers, "Id", "Name"))">
-                <option value="">-- Select Customer --</option>
-            </select>
-            <span asp-validation-for="CustomerId" class="text-danger"></span>
-        </div>
+        <div class="row">
+            <!-- Customer Dropdown -->
+            <div class="col-md-6 mb-3">
+                <label for="CustomerId" class="form-label">Select Customer</label>
+                <select asp-for="CustomerId"
+                        class="form-select selectpicker"
+                        data-live-search="true"
+                        title="Choose a customer...">
+                    @foreach (var c in ViewBag.Customers)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
 
-
-        <!-- Vehicle Name -->
-        <div class="col-md-6 mb-3">
-            <label asp-for="VehicleId" class="form-label">Vehicle</label>
-            <select asp-for="VehicleId" class="form-select select2"
-                    asp-items="@(new SelectList(ViewBag.Vehicles, "Id", "Name"))">
-                <option value="">-- Select Vehicle --</option>
-            </select>
-            <span asp-validation-for="VehicleId" class="text-danger"></span>
+            <!-- Vehicle Dropdown -->
+            <div class="col-md-6 mb-3">
+                <label for="VehicleId" class="form-label">Select Vehicle</label>
+                <select asp-for="VehicleId"
+                        class="form-select selectpicker"
+                        data-live-search="true"
+                        title="Choose a vehicle...">
+                    @foreach (var v in ViewBag.Vehicles)
+                    {
+                        <option value="@v.Id">@v.Make @v.Model (@v.Year)</option>
+                    }
+                </select>
+                <span asp-validation-for="VehicleId" class="text-danger"></span>
+            </div>
         </div>
 
         <!-- Dates -->
@@ -74,6 +89,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

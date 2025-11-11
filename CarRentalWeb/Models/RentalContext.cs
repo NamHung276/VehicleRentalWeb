@@ -9,7 +9,7 @@ namespace VehicleRentalWeb.Models
         {
         }
 
-        // DbSets (tables)
+        // --- Tables ---
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Car> Cars { get; set; }
         public DbSet<Bike> Bikes { get; set; }
@@ -19,6 +19,7 @@ namespace VehicleRentalWeb.Models
         public DbSet<Rental> Rentals { get; set; }
         public DbSet<User> Users { get; set; }
 
+        // --- Model Configuration ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,6 +30,11 @@ namespace VehicleRentalWeb.Models
                 .HasValue<Car>("Car")
                 .HasValue<Bike>("Bike")
                 .HasValue<Truck>("Truck");
+
+            // Precision for RatePerDay
+            modelBuilder.Entity<Vehicle>()
+                .Property(v => v.RatePerDay)
+                .HasPrecision(18, 2);
 
             // User–Customer (1-to-1)
             modelBuilder.Entity<Customer>()
@@ -43,7 +49,13 @@ namespace VehicleRentalWeb.Models
                 .WithMany()
                 .HasForeignKey(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.SetNull);
-        }
 
+            // Vehicle–Rental (1-to-many)
+            modelBuilder.Entity<Rental>()
+                .HasOne(r => r.Vehicle)
+                .WithMany()
+                .HasForeignKey(r => r.VehicleId)
+                .OnDelete(DeleteBehavior.SetNull);
+        }
     }
 }

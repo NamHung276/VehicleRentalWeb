@@ -41,7 +41,7 @@ body {
 
 /* === FOOTER ==== */
 footer {
-    position: absolute;
+    position: relative;
     bottom: 0;
     width: 100%;
     height: 60px;
@@ -51,6 +51,7 @@ footer {
     justify-content: center;
     color: #666;
     font-size: 0.9rem;
+    margin-top: 40px;
 }
 
 /* === BUTTONS === */
@@ -205,6 +206,15 @@ th {
     object-fit: cover;
 }
 
+.card img {
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover img {
+    transform: scale(1.05);
+}
+
+
 .car-info {
     padding: 15px;
 }
@@ -232,4 +242,18 @@ th {
 .price {
     font-weight: bold;
     color: #198754;
+}
+
+@media (max-width: 576px) {
+    .car-card {
+        margin-bottom: 1rem;
+    }
+
+    .car-info p {
+        font-size: 0.85rem;
+    }
+
+    h2, h4 {
+        font-size: 1.3rem;
+    }
 }

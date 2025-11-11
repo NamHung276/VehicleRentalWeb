@@ -8,15 +8,18 @@ namespace VehicleRentalWeb.Models
     {
         public int Id { get; set; }
 
-        // Foreign Key
+        // Foreign Key: Customer (nullable)
         [Display(Name = "Customer")]
         public int? CustomerId { get; set; }
 
         [ForeignKey("CustomerId")]
         public Customer? Customer { get; set; }
 
+        // Foreign Key: Vehicle (nullable)
         [Display(Name = "Vehicle")]
-        public int VehicleId { get; set; }
+        public int? VehicleId { get; set; }
+
+        [ForeignKey("VehicleId")]
         public Vehicle? Vehicle { get; set; }
 
         [Required, DataType(DataType.Date)]
@@ -26,7 +29,8 @@ namespace VehicleRentalWeb.Models
         public DateTime EndDate { get; set; }
 
         [Range(0, 10000)]
-        [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Total Cost ($)")]
+        [Column(TypeName = "decimal(18,2)")] // Fix precision warning
         public decimal TotalCost { get; set; }
 
         [Display(Name = "Rental Source")]

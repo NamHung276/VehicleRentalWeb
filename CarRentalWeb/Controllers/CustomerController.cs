@@ -1,54 +1,156 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
 using VehicleRentalWeb.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace VehicleRentalWeb.Controllers
 {
     public class CustomerController : Controller
     {
-        private static List<Customer> customers = new List<Customer>
-        {
-            new Customer { Id = 1, Name = "John Smith", Email = "john@example.com", Phone = "555-1234", Address = "123 Elm Street", ImagePath = "/images/default_customer.jpg" },
-            new Customer { Id = 2, Name = "Emma Brown", Email = "emma@example.com", Phone = "555-5678", Address = "45 Pine Avenue", ImagePath = "/images/default_customer.jpg" }
-        };
+        private readonly RentalContext _context;
 
+        public CustomerController(RentalContext context)
+        {
+            _context = context;
+        }
+
+        // GET: /Customer
         public IActionResult Index()
         {
+            var customers = _context.Customers.ToList();
             return View(customers);
         }
 
+        // GET: /Customer/Details/5
         public IActionResult Details(int id)
         {
-            var customer = customers.FirstOrDefault(c => c.Id == id);
-            if (customer == null) return NotFound();
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            if (customer == null)
+                return NotFound();
+
             return View(customer);
         }
 
+        // GET: /Customer/Create
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
+        // POST: /Customer/Create
         [HttpPost]
-        public IActionResult Create(Customer customer)
+        public async Task<IActionResult> Create(Customer customer, IFormFile? ImageFile)
         {
-            customer.Id = customers.Max(c => c.Id) + 1;
-            customers.Add(customer);
+            if (ModelState.IsValid)
+            {
+                customer.ImagePath = await SaveCustomerImageAsync(ImageFile);
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Customer {customer.Name} created successfully.";
+                return RedirectToAction("Index");
+            }
+
+            return View(customer);
+        }
+
+// ---------------------- EDIT ----------------------
+        // GET: /Customer/Edit/5
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            if (customer == null)
+                return NotFound();
+
+            return View(customer);
+        }
+
+        // POST: /Customer/Edit/5
+        [HttpPost]
+        public async Task<IActionResult> Edit(Customer customer, IFormFile? ImageFile)
+        {
+            if (!ModelState.IsValid)
+                return View(customer);
+
+            var existingCustomer = _context.Customers.FirstOrDefault(c => c.Id == customer.Id);
+            if (existingCustomer == null)
+                return NotFound();
+
+            existingCustomer.Name = customer.Name;
+            existingCustomer.Email = customer.Email;
+            existingCustomer.Phone = customer.Phone;
+            existingCustomer.Address = customer.Address;
+
+            // Handle image update
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/customers");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                existingCustomer.ImagePath = "/images/customers/" + uniqueFileName;
+            }
+
+            _context.Customers.Update(existingCustomer);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"{existingCustomer.Name} updated successfully!";
             return RedirectToAction("Index");
         }
 
+        // GET: /Customer/Delete/5
+        [HttpGet]
         public IActionResult Delete(int id)
         {
-            var customer = customers.FirstOrDefault(c => c.Id == id);
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            if (customer == null)
+                return NotFound();
+
+            return View(customer);
+        }
+
+        // POST: /Customer/DeleteConfirmed/5
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
             if (customer != null)
-                customers.Remove(customer);
+            {
+                _context.Customers.Remove(customer);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Customer {customer.Name} deleted.";
+            }
 
             return RedirectToAction("Index");
+        }
+
+        // Helper: Save uploaded images
+        private async Task<string> SaveCustomerImageAsync(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+                return "/images/default_customer.jpg";
+
+            var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/customers");
+            Directory.CreateDirectory(uploads);
+
+            var filename = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var path = Path.Combine(uploads, filename);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            return "/images/customers/" + filename;
         }
     }
 }

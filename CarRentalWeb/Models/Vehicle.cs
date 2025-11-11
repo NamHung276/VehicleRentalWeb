@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VehicleRentalWeb.Models
 {
@@ -7,36 +6,38 @@ namespace VehicleRentalWeb.Models
     {
         public int Id { get; set; }
 
-        [Required, StringLength(50)]
+        [Required]
         public string Make { get; set; } = string.Empty;
 
-        [Required, StringLength(50)]
+        [Required]
         public string Model { get; set; } = string.Empty;
 
         [Range(1900, 2100)]
         public int Year { get; set; }
 
-        [Required, StringLength(30)]
         public string Color { get; set; } = string.Empty;
 
-        [Display(Name = "Supplier / Source")]
-        [StringLength(50)]
         public string Supplier { get; set; } = string.Empty;
-
-        public bool IsAvailable { get; set; } = true;
 
         [Display(Name = "Rate Per Day ($)")]
         [Range(0, 10000)]
-        [Column(TypeName = "decimal(18,2)")]
         public decimal RatePerDay { get; set; }
 
-        [Display(Name = "Image Path")]
         public string ImagePath { get; set; } = "/images/default_car.jpg";
 
-        // Polymorphic cost calculation
-        public abstract decimal CalculateCost(int days);
+        // ✅ Shared universal filterable fields
+        [Display(Name = "Category")]
+        public string Category { get; set; } = "General"; // SUV, Sedan, etc.
+
+        [Display(Name = "Status")]
+        public string Status { get; set; } = "Available"; // Available, Rented, In Service
 
         public bool IsRemoved { get; set; } = false;
 
+        // ✅ Derived convenience
+        public bool IsAvailable => Status == "Available";
+
+        // ✅ Each subclass must implement cost logic
+        public abstract decimal CalculateCost(int days);
     }
 }

@@ -1,35 +1,33 @@
 ﻿@model VehicleRentalWeb.Models.Vehicle
-
 @{
-    ViewData["Title"] = "Vehicle Details";
+    ViewData["Title"] = $"{Model.Make} {Model.Model} Details";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<h2 class="mb-4 text-primary">@ViewData["Title"]</h2>
 
-<div class="card shadow-lg border-0 p-4 mb-4 bg-light">
-    <div class="row g-4">
-        <div class="col-md-4 text-center">
-            <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? Url.Content("~/images/default_car.jpg") : Url.Content(Model.ImagePath))"
+<div class="card shadow-sm p-4 mb-4">
+    <div class="row">
+        <div class="col-md-5">
+            <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default_car.jpg" : Model.ImagePath)"
                  alt="@Model.Make @Model.Model"
-                 class="img-fluid rounded border shadow-sm" />
-
+                 class="img-fluid rounded shadow-sm" />
         </div>
 
-        <div class="col-md-8">
-            <h4 class="mb-3 text-primary">@Model.Make @Model.Model (@Model.Year)</h4>
-            <p><strong>Color:</strong> @Model.Color</p>
-            <p><strong>Supplier:</strong> @Model.Supplier</p>
-            <p><strong>Rate Per Day:</strong> $@Model.RatePerDay.ToString("0.00")</p>
-            <p><strong>Available:</strong> @(Model.IsAvailable ? "Yes" : "No")</p>
-
-            <div class="mt-4 d-flex justify-content-between align-items-center">
-                <a asp-controller="Vehicle" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-
-                <div class="d-flex gap-2">
-                    <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-                    <a asp-controller="Vehicle" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
-                </div>
-            </div>
+        <div class="col-md-7">
+            <h4 class="fw-bold">@Model.Make @Model.Model (@Model.Year)</h4>
+            <p class="text-muted mb-2">@Model.Color • @Model.Supplier</p>
+            <p><strong>Fuel Type:</strong> @(Model is Car c ? c.FuelType : "N/A")</p>
+            <p><strong>Transmission:</strong> @(Model is Car c2 ? c2.Transmission : "N/A")</p>
+            <p><strong>Seats:</strong> @(Model is Car c3 ? c3.Seats : 0)</p>
+            <p><strong>AC:</strong> @(Model is Car c4 && c4.HasAC ? "Yes" : "No")</p>
+            <p><strong>CarPlay / Android Auto:</strong> @(Model is Car c5 && c5.HasCarPlay ? "Yes" : "No")</p>
+            <p><strong>Mileage Policy:</strong> @(Model is Car c6 ? c6.MileagePolicy : "N/A")</p>
+            <hr />
+            <p class="price fs-4 fw-bold text-success">$@Model.RatePerDay.ToString("0.00") / day</p>
         </div>
+    </div>
+
+    <div class="text-end mt-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Catalog</a>
     </div>
 </div>

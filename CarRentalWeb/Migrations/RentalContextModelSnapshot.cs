@@ -94,13 +94,14 @@ namespace VehicleRentalWeb.Migrations
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("VehicleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Rentals");
                 });
@@ -139,38 +140,40 @@ namespace VehicleRentalWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsRemoved")
                         .HasColumnType("bit");
 
                     b.Property<string>("Make")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("RatePerDay")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Supplier")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VehicleType")
                         .IsRequired()
@@ -193,8 +196,24 @@ namespace VehicleRentalWeb.Migrations
                 {
                     b.HasBaseType("VehicleRentalWeb.Models.Vehicle");
 
+                    b.Property<int>("EngineCC")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("HasStorageBox")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsElectric")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Transmission")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("Vehicles", t =>
+                        {
+                            t.Property("Transmission")
+                                .HasColumnName("Bike_Transmission");
+                        });
 
                     b.HasDiscriminator().HasValue("Bike");
                 });
@@ -207,8 +226,35 @@ namespace VehicleRentalWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasAC")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasCarPlay")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Luggage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MileagePolicy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Seats")
                         .HasColumnType("int");
+
+                    b.Property<string>("Transmission")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("Vehicles", t =>
+                        {
+                            t.Property("HasAC")
+                                .HasColumnName("Car_HasAC");
+
+                            t.Property("Transmission")
+                                .HasColumnName("Car_Transmission");
+                        });
 
                     b.HasDiscriminator().HasValue("Car");
                 });
@@ -219,6 +265,13 @@ namespace VehicleRentalWeb.Migrations
 
                     b.Property<double>("CapacityInTons")
                         .HasColumnType("float");
+
+                    b.Property<bool>("HasAC")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Transmission")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Truck");
                 });
@@ -240,7 +293,14 @@ namespace VehicleRentalWeb.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("VehicleRentalWeb.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("VehicleRentalWeb.Models.User", b =>
