@@ -65,89 +65,108 @@ namespace VehicleRentalWeb.Controllers
             return View(vehicle);
         }
 
-        // ---------------------- CREATE ----------------------
+        // ---------------------- CREATE (GET) ----------------------
         [HttpGet]
         public IActionResult Create()
         {
             ViewBag.VehicleTypes = new List<string> { "Car", "Bike", "Truck" };
             ViewBag.FuelTypes = new List<string> { "Fuel", "Diesel", "Electric", "Hybrid" };
+            ViewBag.Categories = new List<string> { "Sedan", "SUV", "Hatchback", "Coupe" };
             return View();
         }
 
+        // ---------------------- CREATE (POST) ----------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string vehicleType, Vehicle baseVehicle, IFormFile? ImageFile,
-                                               int? Seats, string? FuelType, string? Category,
-                                               int? EngineCC, bool? IsElectric, double? CapacityInTons)
+        public async Task<IActionResult> Create(
+            string vehicleType,
+            [Bind("Make,Model,Year,Color,Supplier,RatePerDay")] Car formVehicle,
+            IFormFile? ImageFile,
+            int? Seats,
+            string? FuelType,
+            string? Category,
+            int? EngineCC,
+            bool? IsElectric,
+            double? CapacityInTons)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.VehicleTypes = new List<string> { "Car", "Bike", "Truck" };
-                ViewBag.FuelTypes = new List<string> { "Fuel", "Diesel", "Electric", "Hybrid" };
-                return View(baseVehicle);
-            }
-
-            baseVehicle.ImagePath = await SaveImageAsync(ImageFile, "default_car.jpg");
+            Vehicle newVehicle;
 
             switch (vehicleType)
             {
                 case "Car":
-                    _context.Cars.Add(new Car
+                    newVehicle = new Car
                     {
-                        Make = baseVehicle.Make,
-                        Model = baseVehicle.Model,
-                        Year = baseVehicle.Year,
-                        Color = baseVehicle.Color,
-                        Supplier = baseVehicle.Supplier,
-                        RatePerDay = baseVehicle.RatePerDay,
-                        ImagePath = baseVehicle.ImagePath,
-                        Category = Category ?? "Sedan",
-                        Status = "Available",
+                        Make = formVehicle.Make,
+                        Model = formVehicle.Model,
+                        Year = formVehicle.Year,
+                        Color = formVehicle.Color,
+                        Supplier = formVehicle.Supplier,
+                        RatePerDay = formVehicle.RatePerDay,
                         Seats = Seats ?? 4,
-                        FuelType = FuelType ?? "Fuel"
-                    });
+                        FuelType = FuelType ?? "Fuel",
+                        Category = Category ?? "Sedan",
+                        Status = "Available"
+                    };
                     break;
 
                 case "Bike":
-                    _context.Bikes.Add(new Bike
+                    newVehicle = new Bike
                     {
-                        Make = baseVehicle.Make,
-                        Model = baseVehicle.Model,
-                        Year = baseVehicle.Year,
-                        Color = baseVehicle.Color,
-                        Supplier = baseVehicle.Supplier,
-                        RatePerDay = baseVehicle.RatePerDay,
-                        ImagePath = baseVehicle.ImagePath,
-                        Category = Category ?? "Standard",
-                        EngineCC = EngineCC ?? 150,
+                        Make = formVehicle.Make,
+                        Model = formVehicle.Model,
+                        Year = formVehicle.Year,
+                        Color = formVehicle.Color,
+                        Supplier = formVehicle.Supplier,
+                        RatePerDay = formVehicle.RatePerDay,
+                        EngineCC = EngineCC ?? 125,
                         IsElectric = IsElectric ?? false,
                         Status = "Available"
-                    });
+                    };
                     break;
 
                 case "Truck":
-                    _context.Trucks.Add(new Truck
+                    newVehicle = new Truck
                     {
-                        Make = baseVehicle.Make,
-                        Model = baseVehicle.Model,
-                        Year = baseVehicle.Year,
-                        Color = baseVehicle.Color,
-                        Supplier = baseVehicle.Supplier,
-                        RatePerDay = baseVehicle.RatePerDay,
-                        ImagePath = baseVehicle.ImagePath,
-                        Category = Category ?? "Pickup",
-                        CapacityInTons = CapacityInTons ?? 2,
+                        Make = formVehicle.Make,
+                        Model = formVehicle.Model,
+                        Year = formVehicle.Year,
+                        Color = formVehicle.Color,
+                        Supplier = formVehicle.Supplier,
+                        RatePerDay = formVehicle.RatePerDay,
+                        CapacityInTons = CapacityInTons ?? 1.0,
                         Status = "Available"
-                    });
+                    };
                     break;
 
                 default:
-                    ModelState.AddModelError("", "Please select a valid vehicle type.");
-                    return View(baseVehicle);
+                    ModelState.AddModelError("", "Invalid vehicle type selected.");
+                    ViewBag.VehicleTypes = new List<string> { "Car", "Bike", "Truck" };
+                    return View();
             }
 
+            // ---------------------- Image Upload ----------------------
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(uploadsFolder);
+                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    await ImageFile.CopyToAsync(stream);
+                newVehicle.ImagePath = "/images/" + uniqueFileName;
+            }
+            else
+            {
+                newVehicle.ImagePath = "/images/default_car.jpg";
+            }
+
+            // ---------------------- Save to Database ----------------------
+            newVehicle.IsRemoved = false;
+
+            _context.Vehicles.Add(newVehicle);
             await _context.SaveChangesAsync();
-            TempData["Message"] = $"{baseVehicle.Make} {baseVehicle.Model} added successfully!";
+
+            TempData["Message"] = $"{newVehicle.Make} {newVehicle.Model} added successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -169,35 +188,54 @@ namespace VehicleRentalWeb.Controllers
             return NotFound();
         }
 
+        // Updated POST Edit: bind from form into a new derived instance using TryUpdateModelAsync
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCar(int id, Car updatedCar, IFormFile? ImageFile)
+        public async Task<IActionResult> Edit(
+            int id,
+            string vehicleType,
+            IFormFile? ImageFile)
         {
-            if (id != updatedCar.Id) return NotFound();
+            var existing = await _context.Vehicles.FindAsync(id);
+            if (existing == null)
+                return NotFound();
 
-            if (!ModelState.IsValid)
-                return View("Edit", updatedCar);
+            // Create a fresh derived instance and populate from the Request.Form
+            Vehicle updated;
+            if (vehicleType == "Car")
+            {
+                var temp = new Car();
+                // Bind all incoming values that match property names on Car
+                await TryUpdateModelAsync(temp, prefix: "");
+                updated = temp;
+            }
+            else if (vehicleType == "Bike")
+            {
+                var temp = new Bike();
+                await TryUpdateModelAsync(temp, prefix: "");
+                updated = temp;
+            }
+            else if (vehicleType == "Truck")
+            {
+                var temp = new Truck();
+                await TryUpdateModelAsync(temp, prefix: "");
+                updated = temp;
+            }
+            else
+            {
+                updated = existing;
+            }
 
-            var existingCar = await _context.Cars.FirstOrDefaultAsync(c => c.Id == id);
-            if (existingCar == null) return NotFound();
+            // Shared properties
+            existing.Make = updated.Make;
+            existing.Model = updated.Model;
+            existing.Year = updated.Year;
+            existing.Color = updated.Color;
+            existing.Supplier = updated.Supplier;
+            existing.RatePerDay = updated.RatePerDay;
+            existing.Status = updated.Status;
 
-            // Update basic info
-            existingCar.Make = updatedCar.Make;
-            existingCar.Model = updatedCar.Model;
-            existingCar.Year = updatedCar.Year;
-            existingCar.Color = updatedCar.Color;
-            existingCar.Supplier = updatedCar.Supplier;
-            existingCar.RatePerDay = updatedCar.RatePerDay;
-            existingCar.Seats = updatedCar.Seats;
-            existingCar.Luggage = updatedCar.Luggage;
-            existingCar.Transmission = updatedCar.Transmission;
-            existingCar.FuelType = updatedCar.FuelType;
-            existingCar.HasAC = updatedCar.HasAC;
-            existingCar.HasCarPlay = updatedCar.HasCarPlay;
-            existingCar.Status = updatedCar.Status;
-            // existingCar.IsAvailable = updatedCar.IsAvailable;
-
-            // Handle optional new image
+            // Optional image upload
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
@@ -206,14 +244,35 @@ namespace VehicleRentalWeb.Controllers
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                     await ImageFile.CopyToAsync(stream);
-
-                existingCar.ImagePath = "/images/" + uniqueFileName;
+                existing.ImagePath = "/images/" + uniqueFileName;
             }
 
-            _context.Update(existingCar);
+            // Type-specific logic
+            if (existing is Car existingCar && updated is Car updatedCar)
+            {
+                existingCar.Seats = updatedCar.Seats;
+                existingCar.Luggage = updatedCar.Luggage;
+                existingCar.Transmission = updatedCar.Transmission;
+                existingCar.FuelType = updatedCar.FuelType;
+                existingCar.HasAC = updatedCar.HasAC;
+                existingCar.HasCarPlay = updatedCar.HasCarPlay;
+            }
+            else if (existing is Bike existingBike && updated is Bike updatedBike)
+            {
+                existingBike.EngineCC = updatedBike.EngineCC;
+                existingBike.Transmission = updatedBike.Transmission;
+                existingBike.IsElectric = updatedBike.IsElectric;
+            }
+            else if (existing is Truck existingTruck && updated is Truck updatedTruck)
+            {
+                existingTruck.CapacityInTons = updatedTruck.CapacityInTons;
+                existingTruck.Transmission = updatedTruck.Transmission;
+                existingTruck.HasAC = updatedTruck.HasAC;
+            }
+
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = $"{existingCar.Make} {existingCar.Model} updated successfully!";
+            TempData["Message"] = $"{existing.Make} {existing.Model} updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
