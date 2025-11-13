@@ -1,99 +1,189 @@
-﻿@model VehicleRentalWeb.Models.Car
-
+﻿@model VehicleRentalWeb.Models.Vehicle
 @{
-    ViewData["Title"] = "Add New Vehicle";
+    ViewData["Title"] = "Create Vehicle";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4 mb-5">
+    <h2 class="fw-bold text-primary">Create New Vehicle</h2>
+    <hr />
 
-<div class="card shadow p-4">
-    <form asp-controller="Vehicle" asp-action="Create" method="post" enctype="multipart/form-data">
-        <div class="row g-3">
+    <form asp-action="Create" enctype="multipart/form-data" method="post" class="needs-validation" novalidate>
+        <!-- Vehicle Type -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Vehicle Type</label>
+            <select id="vehicleType" name="vehicleType" class="form-select" required>
+                <option value="">-- Select Type --</option>
+                <option value="Car">Car</option>
+                <option value="Bike">Bike</option>
+                <option value="Truck">Truck</option>
+            </select>
+            <div class="invalid-feedback">Please select a vehicle type.</div>
+        </div>
+
+        <!-- General Info -->
+        <div class="row">
             <div class="col-md-6">
-                <label asp-for="Make" class="form-label"></label>
-                <input asp-for="Make" class="form-control" />
-                <span asp-validation-for="Make" class="text-danger"></span>
+                <div class="mb-3">
+                    <label asp-for="Make" class="form-label"></label>
+                    <input asp-for="Make" class="form-control" required />
+                    <div class="invalid-feedback">Make is required.</div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Model" class="form-label"></label>
+                    <input asp-for="Model" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Year" class="form-label"></label>
+                    <input asp-for="Year" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Color" class="form-label"></label>
+                    <input asp-for="Color" class="form-control" required />
+                </div>
             </div>
 
             <div class="col-md-6">
-                <label asp-for="Model" class="form-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Year" class="form-label"></label>
-                <input asp-for="Year" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Color" class="form-label"></label>
-                <input asp-for="Color" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Supplier" class="form-label"></label>
-                <input asp-for="Supplier" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="RatePerDay" class="form-label"></label>
-                <input asp-for="RatePerDay" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="FuelType" class="form-label"></label>
-                <select asp-for="FuelType" class="form-select">
-                    <option>Fuel</option>
-                    <option>Diesel</option>
-                    <option>Electric</option>
-                    <option>Hybrid</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Transmission" class="form-label"></label>
-                <select asp-for="Transmission" class="form-select">
-                    <option>Automatic</option>
-                    <option>Manual</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Seats" class="form-label"></label>
-                <input asp-for="Seats" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label asp-for="Luggage" class="form-label"></label>
-                <input asp-for="Luggage" class="form-control" />
-            </div>
-
-            <div class="col-md-4 form-check mt-4">
-                <input asp-for="HasAC" class="form-check-input" />
-                <label asp-for="HasAC" class="form-check-label"></label>
-            </div>
-
-            <div class="col-md-4 form-check mt-4">
-                <input asp-for="HasCarPlay" class="form-check-input" />
-                <label asp-for="HasCarPlay" class="form-check-label"></label>
-            </div>
-
-            <div class="col-md-6 mt-4">
-                <label for="ImageFile" class="form-label">Upload Vehicle Image</label>
-                <input type="file" name="ImageFile" class="form-control" />
+                <div class="mb-3">
+                    <label asp-for="Supplier" class="form-label"></label>
+                    <input asp-for="Supplier" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="RatePerDay" class="form-label"></label>
+                    <input asp-for="RatePerDay" class="form-control" type="number" step="0.01" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label"></label>
+                    <input asp-for="Status" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <input type="file" name="ImageFile" class="form-control" accept="image/*" id="imageInput" />
+                    <img id="previewImage" src="#" alt="Preview" class="img-fluid rounded mt-2 d-none" style="max-height: 200px;" />
+                </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-4">
-            <a asp-action="Index" class="btn btn-secondary me-2">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Vehicle</button>
+        <!-- Car Fields -->
+        <div id="carFields" class="vehicle-fields d-none mt-4">
+            <h5 class="text-success">Car Specifications</h5>
+            <hr />
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Seats</label>
+                    <input type="number" name="Seats" class="form-control" min="1" max="10" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Luggage</label>
+                    <input type="text" name="Luggage" class="form-control" placeholder="1 Large, 1 Small" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Transmission</label>
+                    <input type="text" name="Transmission" class="form-control" placeholder="Automatic" />
+                </div>
+                <div class="col-md-3 form-check ms-3">
+                    <input type="checkbox" name="HasAC" class="form-check-input" checked />
+                    <label class="form-check-label">A/C</label>
+                </div>
+                <div class="col-md-3 form-check">
+                    <input type="checkbox" name="HasCarPlay" class="form-check-input" checked />
+                    <label class="form-check-label">CarPlay</label>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Fuel Type</label>
+                    <input type="text" name="FuelType" class="form-control" value="Fuel" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Mileage Policy</label>
+                    <input type="text" name="MileagePolicy" class="form-control" value="Unlimited" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Bike Fields -->
+        <div id="bikeFields" class="vehicle-fields d-none mt-4">
+            <h5 class="text-success">Bike Specifications</h5>
+            <hr />
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Engine CC</label>
+                    <input type="number" name="EngineCC" class="form-control" value="150" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Transmission</label>
+                    <input type="text" name="Transmission" class="form-control" value="Manual" />
+                </div>
+                <div class="col-md-4 form-check">
+                    <input type="checkbox" name="IsElectric" class="form-check-input" />
+                    <label class="form-check-label">Electric Bike</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Truck Fields -->
+        <div id="truckFields" class="vehicle-fields d-none mt-4">
+            <h5 class="text-success">Truck Specifications</h5>
+            <hr />
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Capacity (Tons)</label>
+                    <input type="number" name="CapacityInTons" class="form-control" value="2.0" step="0.1" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Transmission</label>
+                    <input type="text" name="Transmission" class="form-control" value="Manual" />
+                </div>
+                <div class="col-md-4 form-check">
+                    <input type="checkbox" name="HasAC" class="form-check-input" checked />
+                    <label class="form-check-label">A/C</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success me-2">Create Vehicle</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        // Toggle Vehicle Fields
+        const typeSelect = document.getElementById("vehicleType");
+        const fields = document.querySelectorAll(".vehicle-fields");
+        typeSelect.addEventListener("change", () => {
+            fields.forEach(f => f.classList.add("d-none"));
+            const selected = typeSelect.value;
+            if (selected === "Car") document.getElementById("carFields").classList.remove("d-none");
+            if (selected === "Bike") document.getElementById("bikeFields").classList.remove("d-none");
+            if (selected === "Truck") document.getElementById("truckFields").classList.remove("d-none");
+        });
+
+        // Image Preview
+        document.getElementById("imageInput").addEventListener("change", function () {
+            const [file] = this.files;
+            const preview = document.getElementById("previewImage");
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.classList.remove("d-none");
+            } else {
+                preview.classList.add("d-none");
+            }
+        });
+
+        // Bootstrap validation
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
 }

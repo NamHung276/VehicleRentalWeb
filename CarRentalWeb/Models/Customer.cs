@@ -27,5 +27,10 @@ namespace VehicleRentalWeb.Models
         // This is the foreign key side
         public int? UserId { get; set; }
         public User? User { get; set; }
+
+        // Archive flag
+        [Display(Name = "Archived")]
+        public bool IsArchived { get; set; } = false;
+
     }
 }

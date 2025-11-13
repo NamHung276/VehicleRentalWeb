@@ -1,183 +1,119 @@
 ﻿@model VehicleRentalWeb.Models.Vehicle
-@using Microsoft.AspNetCore.Mvc.Rendering
-
 @{
     ViewData["Title"] = "Edit Vehicle";
-    var typeName = Model.GetType().Name;
+    string vehicleType = Model.GetType().Name;
 }
 
 <div class="container mt-4">
-    <h2 class="fw-bold text-primary mb-4">
-        <i class="bi bi-pencil-square me-2"></i>Edit @typeName
-    </h2>
+    <h2>Edit @vehicleType</h2>
+    <hr />
 
-    <div class="card shadow p-4">
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" name="vehicleType" value="@typeName" />
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="vehicleType" value="@vehicleType" />
 
-            <!-- General Info -->
-            <div class="row">
-                <div class="col-md-6 mb-3">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
                     <label asp-for="Make" class="form-label"></label>
                     <input asp-for="Make" class="form-control" />
-                    <span asp-validation-for="Make" class="text-danger"></span>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="mb-3">
                     <label asp-for="Model" class="form-label"></label>
                     <input asp-for="Model" class="form-control" />
-                    <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="mb-3">
                     <label asp-for="Year" class="form-label"></label>
                     <input asp-for="Year" class="form-control" />
-                    <span asp-validation-for="Year" class="text-danger"></span>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="mb-3">
                     <label asp-for="Color" class="form-label"></label>
                     <input asp-for="Color" class="form-control" />
-                    <span asp-validation-for="Color" class="text-danger"></span>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label asp-for="RatePerDay" class="form-label">Rate Per Day ($)</label>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Supplier" class="form-label"></label>
+                    <input asp-for="Supplier" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="RatePerDay" class="form-label"></label>
                     <input asp-for="RatePerDay" class="form-control" />
-                    <span asp-validation-for="RatePerDay" class="text-danger"></span>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label"></label>
+                    <input asp-for="Status" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <input type="file" name="ImageFile" class="form-control" />
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <div class="mt-2">
+                        <img src="@Model.ImagePath" alt="Current Image" class="img-thumbnail" style="max-width:150px;" />
+                    </div>
+                }
             </div>
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="Supplier" class="form-label"></label>
-                <input asp-for="Supplier" class="form-control" />
-                <span asp-validation-for="Supplier" class="text-danger"></span>
-            </div>
+        <!-- Car Fields -->
+        <input type="number" name="Seats" class="form-control" min="1" max="10"
+               value="@(Model is Car carModel ? carModel.Seats : 4)" />
 
-            <!-- Status Dropdown -->
-            <div class="col-md-4 mb-3">
-                <label asp-for="Status" class="form-label">Status</label>
-                <select asp-for="Status" class="form-select"
-                        asp-items="@(new SelectList(new[] { "Available", "Rented", "In Service" }, Model.Status))">
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
+        <input type="text" name="Luggage" class="form-control"
+               value="@(Model is Car carModelL ? carModelL.Luggage : "")" />
+
+        <input type="text" name="Transmission" class="form-control"
+               value="@(Model is Car carModelT ? carModelT.Transmission : "")" />
+
+        <input type="checkbox" name="HasAC" class="form-check-input"
+               @(Model is Car carModelAC && carModelAC.HasAC ? "checked" : "") />
+
+        <input type="checkbox" name="HasCarPlay" class="form-check-input"
+               @(Model is Car carModelCP && carModelCP.HasCarPlay ? "checked" : "") />
+
+        <input type="text" name="FuelType" class="form-control"
+               value="@(Model is Car carModelF ? carModelF.FuelType : "Fuel")" />
+
+        <input type="text" name="MileagePolicy" class="form-control"
+               value="@(Model is Car carModelM ? carModelM.MileagePolicy : "Unlimited")" />
+
+        <!-- Bike Fields -->
+        <input type="number" name="EngineCC" class="form-control"
+               value="@(Model is Bike bikeE ? bikeE.EngineCC : 150)" />
+
+        <input type="text" name="Transmission" class="form-control"
+               value="@(Model is Bike bikeT ? bikeT.Transmission : "Manual")" />
+
+        <input type="checkbox" name="IsElectric" class="form-check-input"
+               @(Model is Bike bikeI && bikeI.IsElectric ? "checked" : "") />
+
+        <!-- Truck Fields -->
+        <input type="number" name="CapacityInTons" class="form-control" step="0.1"
+               value="@(Model is Truck truckC ? truckC.CapacityInTons : 2.0)" />
+
+        <input type="text" name="Transmission" class="form-control"
+               value="@(Model is Truck truckT ? truckT.Transmission : "Manual")" />
+
+        <input type="checkbox" name="HasAC" class="form-check-input"
+               @(Model is Truck truckAC && truckAC.HasAC ? "checked" : "") />
 
 
-            <!-- Type-specific fields -->
-            @if (Model is VehicleRentalWeb.Models.Car car)
-            {
-                <h5 class="fw-bold text-primary mt-4 mb-2">Car Details</h5>
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Seats</label>
-                        <input name="Seats" value="@car.Seats" class="form-control" />
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Luggage</label>
-                        <input name="Luggage" value="@car.Luggage" class="form-control" />
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Transmission</label>
-                        <select name="Transmission" class="form-select">
-                            <option value="Automatic" selected="@(car.Transmission == "Automatic" ? "selected" : "")">Automatic</option>
-                            <option value="Manual" selected="@(car.Transmission == "Manual" ? "selected" : "")">Manual</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Fuel Type</label>
-                        <select name="FuelType" class="form-select">
-                            <option value="Fuel" selected="@(car.FuelType == "Fuel" ? "selected" : "")">Fuel</option>
-                            <option value="Diesel" selected="@(car.FuelType == "Diesel" ? "selected" : "")">Diesel</option>
-                            <option value="Electric" selected="@(car.FuelType == "Electric" ? "selected" : "")">Electric</option>
-                            <option value="Hybrid" selected="@(car.FuelType == "Hybrid" ? "selected" : "")">Hybrid</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-check mb-2">
-                    <input type="hidden" name="HasAC" value="false" />
-                    <input name="HasAC" class="form-check-input" type="checkbox" value="true" checked="@(car.HasAC ? "checked" : "")" />
-                    <label class="form-check-label">Air Conditioning</label>
-                </div>
-                <div class="form-check mb-3">
-                    <input type="hidden" name="HasCarPlay" value="false" />
-                    <input name="HasCarPlay" class="form-check-input" type="checkbox" value="true" checked="@(car.HasCarPlay ? "checked" : "")" />
-                    <label class="form-check-label">CarPlay / Android Auto</label>
-                </div>
-            }
-
-            @if (Model is VehicleRentalWeb.Models.Bike bike)
-            {
-                <h5 class="fw-bold text-primary mt-4 mb-2">Bike Details</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Engine (CC)</label>
-                        <input name="EngineCC" value="@bike.EngineCC" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Transmission</label>
-                        <select name="Transmission" class="form-select">
-                            <option value="Automatic" selected="@(bike.Transmission == "Automatic" ? "selected" : "")">Automatic</option>
-                            <option value="Manual" selected="@(bike.Transmission == "Manual" ? "selected" : "")">Manual</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-check mb-3">
-                    <input type="hidden" name="IsElectric" value="false" />
-                    <input name="IsElectric" class="form-check-input" type="checkbox" value="true" checked="@(bike.IsElectric ? "checked" : "")" />
-                    <label class="form-check-label">Electric Bike</label>
-                </div>
-            }
-
-            @if (Model is VehicleRentalWeb.Models.Truck truck)
-            {
-                <h5 class="fw-bold text-primary mt-4 mb-2">Truck Details</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Capacity (tons)</label>
-                        <input name="CapacityInTons" value="@truck.CapacityInTons" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Transmission</label>
-                        <select name="Transmission" class="form-select">
-                            <option value="Automatic" selected="@(truck.Transmission == "Automatic" ? "selected" : "")">Automatic</option>
-                            <option value="Manual" selected="@(truck.Transmission == "Manual" ? "selected" : "")">Manual</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-check mb-3">
-                    <input type="hidden" name="HasAC" value="false" />
-                    <input name="HasAC" class="form-check-input" type="checkbox" value="true" checked="@(truck.HasAC ? "checked" : "")" />
-                    <label class="form-check-label">Air Conditioning</label>
-                </div>
-            }
-
-            <!-- Image Upload -->
-            <div class="mb-3 mt-4">
-                <label class="form-label">Current Image</label>
-                <div class="mb-2">
-                    <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? Url.Content("~/images/default_car.jpg") : Url.Content(Model.ImagePath))"
-                         alt="@Model.Make @Model.Model"
-                         class="img-thumbnail" style="max-width:260px;" />
-                </div>
-                <label class="form-label">Upload New Image (optional)</label>
-                <input type="file" name="ImageFile" class="form-control" accept="image/*" />
-            </div>
-
-            <!-- Buttons -->
-            <div class="d-flex justify-content-end">
-                <a asp-action="Index" class="btn btn-outline-secondary me-2">
-                    <i class="bi bi-arrow-left-circle"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
+        <button type="submit" class="btn btn-success mt-3">Save Changes</button>
+        <a asp-action="Index" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
 </div>
 
 @section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        const type = "@vehicleType";
+        const fields = document.querySelectorAll(".vehicle-fields");
+        fields.forEach(f => f.classList.add("d-none"));
+
+        if (type === "Car") document.getElementById("carFields").classList.remove("d-none");
+        if (type === "Bike") document.getElementById("bikeFields").classList.remove("d-none");
+        if (type === "Truck") document.getElementById("truckFields").classList.remove("d-none");
+    </script>
 }

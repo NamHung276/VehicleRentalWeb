@@ -1,0 +1,35 @@
+﻿@model VehicleRentalWeb.Models.Car
+@{
+    ViewData["Title"] = $"{Model.Make} {Model.Model} Details";
+}
+
+<h2 class="mb-4 text-primary">@ViewData["Title"]</h2>
+
+<div class="card shadow-sm p-4 mb-4">
+    <div class="row">
+        <div class="col-md-5">
+            <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default_car.jpg" : Model.ImagePath)"
+                 alt="@Model.Make @Model.Model"
+                 class="img-fluid rounded shadow-sm" />
+        </div>
+
+        <div class="col-md-7">
+            <h4 class="fw-bold">@Model.Make @Model.Model (@Model.Year)</h4>
+            <p class="text-muted mb-2">@Model.Color • @Model.Supplier</p>
+            <p><strong>Seats:</strong> @Model.Seats</p>
+            <p><strong>Luggage:</strong> @Model.Luggage</p>
+            <p><strong>Transmission:</strong> @Model.Transmission</p>
+            <p><strong>Fuel Type:</strong> @Model.FuelType</p>
+            <p><strong>Has A/C:</strong> @(Model.HasAC ? "Yes" : "No")</p>
+            <p><strong>CarPlay / Android Auto:</strong> @(Model.HasCarPlay ? "Yes" : "No")</p>
+            <p><strong>Mileage Policy:</strong> @Model.MileagePolicy</p>
+            <hr />
+            <p class="price fs-4 fw-bold text-success">$@Model.RatePerDay.ToString("0.00") / day</p>
+        </div>
+    </div>
+
+    <div class="text-end mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Catalog</a>
+    </div>
+</div>

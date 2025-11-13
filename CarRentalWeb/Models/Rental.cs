@@ -38,5 +38,9 @@ namespace VehicleRentalWeb.Models
 
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; }
+
+        [Display(Name = "Archived")]
+        public bool IsArchived { get; set; } = false;
+
     }
 }

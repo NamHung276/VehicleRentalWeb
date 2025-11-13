@@ -140,22 +140,58 @@ namespace VehicleRentalWeb.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
-            if (rental == null)
-                return NotFound();
-
-            // Restore vehicle status when rental deleted
-            var vehicle = await _context.Vehicles.FindAsync(rental.VehicleId);
-            if (vehicle != null)
+            if (rental != null)
             {
-                vehicle.Status = "Available";
-                _context.Vehicles.Update(vehicle);
+                // Restore vehicle status
+                var vehicle = await _context.Vehicles.FindAsync(rental.VehicleId);
+                if (vehicle != null)
+                {
+                    vehicle.Status = "Available";
+                    _context.Vehicles.Update(vehicle);
+                }
+
+                _context.Rentals.Remove(rental);
+                await _context.SaveChangesAsync();
+
+                // Add TempData success message
+                TempData["Message"] = $"Rental ID {rental.Id} deleted successfully!";
             }
 
-            _context.Rentals.Remove(rental);
-            await _context.SaveChangesAsync();
-
-            TempData["Message"] = "Rental deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
+
+        // ---------------------- ARCHIVE / UNARCHIVE ----------------------
+        // POST: /Rental/Archive/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Archive(int id)
+        {
+            var rental = await _context.Rentals.FindAsync(id);
+            if (rental != null)
+            {
+                rental.IsArchived = true;
+                _context.Rentals.Update(rental);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Rental ID {rental.Id} archived successfully!";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /Rental/Unarchive/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unarchive(int id)
+        {
+            var rental = await _context.Rentals.FindAsync(id);
+            if (rental != null)
+            {
+                rental.IsArchived = false;
+                _context.Rentals.Update(rental);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Rental ID {rental.Id} restored from archive!";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

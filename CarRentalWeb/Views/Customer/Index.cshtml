@@ -11,15 +11,21 @@
 
     @if (TempData["Message"] != null)
     {
-        <div class="alert alert-success text-center">@TempData["Message"]</div>
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <i class="bi bi-check-circle me-1"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     }
 
     <div class="text-center mb-4">
         <a asp-action="Create" class="btn btn-success btn-lg me-2">
             <i class="bi bi-person-plus"></i> Add New Customer
         </a>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg me-2">
             <i class="bi bi-house-door"></i> Home
+        </a>
+        <a asp-action="Archived" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-archive"></i> View Archived
         </a>
     </div>
 
@@ -43,11 +49,29 @@
                         <a asp-controller="Customer" asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-warning btn-sm me-2">
                             <i class="bi bi-pencil"></i> Edit
                         </a>
-                        <a asp-controller="Customer" asp-action="Delete" asp-route-id="@c.Id" class="btn btn-outline-danger btn-sm">
+                        <a asp-controller="Customer" asp-action="Delete" asp-route-id="@c.Id" class="btn btn-outline-danger btn-sm me-2">
                             <i class="bi bi-trash"></i> Delete
                         </a>
-                    </div>
 
+                        @if (!c.IsArchived)
+                        {
+                            <form asp-action="Archive" asp-route-id="@c.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Archive">
+                                    <i class="bi bi-archive"></i> Archive
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Unarchive" asp-route-id="@c.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-success btn-sm" title="Restore">
+                                    <i class="bi bi-box-arrow-in-down"></i> Restore
+                                </button>
+                            </form>
+                        }
+                    </div>
                 </div>
             </div>
         }

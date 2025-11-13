@@ -1,0 +1,37 @@
+﻿@model VehicleRentalWeb.Models.Customer
+@{
+    ViewData["Title"] = "Delete Customer";
+}
+
+<div class="container mt-5">
+    <h2 class="text-danger fw-bold text-center">
+        <i class="bi bi-exclamation-triangle"></i> Delete Customer
+    </h2>
+    <hr />
+
+    <div class="card shadow border-0 mx-auto" style="max-width: 500px;">
+        <div class="card-body text-center">
+            <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default_customer.jpg" : Model.ImagePath)"
+                 class="rounded mb-3 shadow-sm" width="150" height="150" style="object-fit:cover;" />
+
+            <h4 class="text-primary">@Model.Name</h4>
+            <p>@Model.Email</p>
+            <p class="text-muted">@Model.Phone</p>
+            <p class="text-muted">@Model.Address</p>
+
+            <div class="alert alert-danger mt-3">
+                Are you sure you want to delete this customer?
+            </div>
+
+            <form asp-action="DeleteConfirmed" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger btn-lg me-2">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Customer>
+
+@{
+    ViewData["Title"] = "Archived Customers";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4 fw-bold text-primary">
+        <i class="bi bi-archive me-2"></i>@ViewData["Title"]
+    </h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <i class="bi bi-check-circle me-1"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="text-center mb-4">
+        <a asp-action="Index" class="btn btn-outline-primary btn-lg me-2">
+            <i class="bi bi-arrow-left"></i> Back to Customers
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var c in Model)
+        {
+            <div class="col">
+                <div class="card shadow border-0 h-100">
+                    <img src="@(string.IsNullOrEmpty(c.ImagePath) ? "/images/default_customer.jpg" : c.ImagePath)"
+                         class="card-img-top" style="object-fit:cover;height:220px;" alt="@c.Name" />
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold text-primary">@c.Name</h5>
+                        <p class="text-muted">@c.Email</p>
+                        <p>@c.Phone</p>
+                        <p class="text-muted small">@c.Address</p>
+                    </div>
+                    <div class="card-footer text-center bg-white border-0 pb-3">
+                        <form asp-action="Restore" asp-route-id="@c.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center mt-5">
+            <i class="bi bi-person-x"></i> No archived customers found.
+        </div>
+    }
+</div>

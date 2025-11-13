@@ -23,7 +23,7 @@ namespace VehicleRentalWeb.Controllers
             return View(customers);
         }
 
-        // GET: /Customer/Details/5
+        // GET: /Customer/Details/5Microsoft.Data.SqlClient.SqlException: 'Invalid column name 'IsArchived'.'
         public IActionResult Details(int id)
         {
             var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
@@ -124,16 +124,19 @@ namespace VehicleRentalWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
+            var customer = await _context.Customers.FindAsync(id);
             if (customer != null)
             {
                 _context.Customers.Remove(customer);
                 await _context.SaveChangesAsync();
-                TempData["Message"] = $"Customer {customer.Name} deleted.";
+
+                // Add TempData success message
+                TempData["Message"] = $"Customer '{customer.Name}' was successfully deleted!";
             }
 
             return RedirectToAction("Index");
         }
+
 
         // Helper: Save uploaded images
         private async Task<string> SaveCustomerImageAsync(IFormFile? file)
@@ -152,5 +155,38 @@ namespace VehicleRentalWeb.Controllers
 
             return "/images/customers/" + filename;
         }
+        // ---------------------- ARCHIVE / UNARCHIVE ----------------------
+        // POST: /Customer/Archive/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Archive(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer != null)
+            {
+                customer.IsArchived = true;
+                _context.Customers.Update(customer);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Customer '{customer.Name}' archived successfully!";
+            }
+            return RedirectToAction("Index");
+        }
+
+        // POST: /Customer/Unarchive/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unarchive(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer != null)
+            {
+                customer.IsArchived = false;
+                _context.Customers.Update(customer);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = $"Customer '{customer.Name}' restored from archive!";
+            }
+            return RedirectToAction("Index");
+        }
+
     }
 }

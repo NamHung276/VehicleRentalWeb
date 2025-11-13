@@ -4,46 +4,62 @@
     ViewData["Title"] = "Archived Vehicles";
 }
 
-<h2 class="fw-bold text-danger mb-4"><i class="bi bi-archive-fill me-2"></i>@ViewData["Title"]</h2>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-secondary text-center py-5">
-        <i class="bi bi-inbox fs-1 mb-3 text-muted"></i>
-        <h5>No archived vehicles found.</h5>
-        <a asp-action="Index" class="btn btn-primary mt-3">Return to Catalog</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-danger mb-0">
+            <i class="bi bi-archive-fill me-2"></i>Archived Vehicles
+        </h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle me-1"></i> Back to Catalog
+        </a>
     </div>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var v in Model)
-        {
-            <div class="col">
-                <div class="card border-danger shadow-sm h-100">
-                    <div class="position-relative">
-                        <img src="@(string.IsNullOrEmpty(v.ImagePath) ? "/images/default_car.jpg" : v.ImagePath)"
-                             alt="@v.Make @v.Model"
-                             class="card-img-top" style="height:180px; object-fit:cover;" />
-                        <span class="badge bg-danger position-absolute top-0 end-0 m-2">Archived</span>
-                    </div>
 
-                    <div class="card-body">
-                        <h5 class="fw-bold text-danger">@v.Make @v.Model (@v.Year)</h5>
-                        <p class="text-muted small">@v.Supplier • $@v.RatePerDay/day</p>
-                    </div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-secondary text-center py-5">
+            <i class="bi bi-inbox fs-1 mb-3 text-muted"></i>
+            <h5>No archived vehicles found.</h5>
+            <a asp-action="Index" class="btn btn-primary mt-3">Return to Catalog</a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var v in Model)
+            {
+                <div class="col">
+                    <div class="card border-danger shadow-sm h-100">
+                        <div class="position-relative">
+                            <img src="@(string.IsNullOrEmpty(v.ImagePath) ? "/images/default_car.jpg" : v.ImagePath)"
+                                 alt="@v.Make @v.Model"
+                                 class="card-img-top" style="height:180px; object-fit:cover;" />
+                            <span class="badge bg-danger position-absolute top-0 end-0 m-2">Archived</span>
+                        </div>
 
-                    <div class="card-footer d-flex justify-content-between bg-light">
-                        <form asp-action="Restore" asp-route-id="@v.Id" method="post">
-                            <button type="submit" class="btn btn-sm btn-success">Restore</button>
-                        </form>
-                        <form asp-action="DeletePermanent" asp-route-id="@v.Id" method="post"
-                              onsubmit="return confirm('⚠ This will permanently delete the vehicle. Continue?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
+                        <div class="card-body">
+                            <h5 class="fw-bold text-danger">@v.Make @v.Model (@v.Year)</h5>
+                            <p class="text-muted small">@v.Supplier • $@v.RatePerDay/day</p>
+                            <p class="text-muted small">
+                                <strong>Type:</strong> @v.GetType().Name
+                            </p>
+                        </div>
+
+                        <div class="card-footer d-flex justify-content-between bg-light">
+                            <form asp-action="Restore" asp-route-id="@v.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
+                                </button>
+                            </form>
+                            <form asp-action="DeletePermanent" asp-route-id="@v.Id" method="post"
+                                  onsubmit="return confirm('⚠ This will permanently delete the vehicle. Continue?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
+    }
+</div>
