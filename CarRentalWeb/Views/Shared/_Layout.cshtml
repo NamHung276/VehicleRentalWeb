@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -15,60 +17,101 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
+
+                <!-- Branding -->
+                <a class="navbar-brand fw-bold text-primary"
+                   asp-controller="Home" asp-action="Index">
                     Vehicle Rental
                 </a>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                     <ul class="navbar-nav">
+
+                        <!-- Always-visible -->
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Vehicle" asp-action="Index">Vehicles</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Customer" asp-action="Index">Customers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Rental" asp-action="Index">Rentals</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
 
-                        @if (Context.Session.GetString("Username") != null)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-controller="Account" asp-action="Logout">
-                                    Logout (@Context.Session.GetString("Username"))
-                                </a>
-                            </li>
+                        @* Null-safe check for authenticated user and roles *@
+                        @{
+                            var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+                            var isAdmin = User?.IsInRole("Admin") == true;
+                            var isCustomer = User?.IsInRole("Customer") == true;
                         }
-                        else
+
+                        <!-- ADMIN NAVIGATION -->
+                        @if (isAdmin)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link text-dark" asp-controller="Vehicle" asp-action="Index">Vehicles</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link text-dark" asp-controller="Customer" asp-action="Index">Customers</a>
                             </li>
-                        }
-                        @if (Context.Session.GetString("Role") == "Admin")
-                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Rental" asp-action="Index">Rentals</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a>
                             </li>
                         }
 
+                        <!-- CUSTOMER NAVIGATION -->
+                        @if (isCustomer)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="Index">
+                                    My Rentals
+                                </a>
+                            </li>
+                        }
+
+                        <!-- LOGIN / LOGOUT -->
+                        @if (isAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-primary"
+                                   href="#" id="userDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    @User?.Identity?.Name
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           asp-controller="Account" asp-action="Logout">
+                                            Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+
                     </ul>
                 </div>
+
             </div>
         </nav>
     </header>
 
-
-    <div class="container mt-4">
-        <main role="main" class="main-content container mt-5">
+    <div class="container">
+        <main class="mt-4">
             @RenderBody()
         </main>
     </div>
@@ -76,7 +119,7 @@
     <footer class="border-top footer text-muted text-center mt-4">
         <div class="container">
             &copy; 2025 - Vehicle Rental Web |
-            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+            <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
         </div>
     </footer>
 

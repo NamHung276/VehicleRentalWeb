@@ -1,86 +1,55 @@
 ﻿@model IEnumerable<VehicleRentalWeb.Models.Customer>
-
 @{
-    ViewData["Title"] = "Customer List";
+    ViewData["Title"] = "Customer Management";
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4 fw-bold text-primary">
-        <i class="bi bi-people-fill me-2"></i>@ViewData["Title"]
-    </h2>
+    <h2>Customer Management</h2>
 
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-            <i class="bi bi-check-circle me-1"></i> @TempData["Message"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <a asp-action="Create" class="btn btn-primary mb-3">+ Add Customer</a>
+    <a asp-action="Archived" class="btn btn-outline-danger mb-3 ms-2">
+        <i class="bi bi-archive-fill me-1"></i> View Archived
+    </a>
 
-    <div class="text-center mb-4">
-        <a asp-action="Create" class="btn btn-success btn-lg me-2">
-            <i class="bi bi-person-plus"></i> Add New Customer
-        </a>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg me-2">
-            <i class="bi bi-house-door"></i> Home
-        </a>
-        <a asp-action="Archived" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-archive"></i> View Archived
-        </a>
-    </div>
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="@c.ImagePath" alt="Customer Image" width="100"
+                             class="rounded shadow" />
+                    </td>
+                    <td>@c.Name</td>
+                    <td>@c.Email</td>
+                    <td>@c.Phone</td>
+                    <td>@c.Address</td>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var c in Model)
-        {
-            <div class="col">
-                <div class="card shadow border-0 h-100">
-                    <img src="@(string.IsNullOrEmpty(c.ImagePath) ? "/images/default_customer.jpg" : c.ImagePath)"
-                         class="card-img-top" style="object-fit:cover;height:220px;" alt="@c.Name" />
-                    <div class="card-body text-center">
-                        <h5 class="card-title fw-bold text-primary">@c.Name</h5>
-                        <p class="text-muted">@c.Email</p>
-                        <p>@c.Phone</p>
-                        <p class="text-muted small">@c.Address</p>
-                    </div>
-                    <div class="card-footer text-center bg-white border-0 pb-3">
-                        <a asp-controller="Customer" asp-action="Details" asp-route-id="@c.Id" class="btn btn-outline-primary btn-sm me-2">
-                            <i class="bi bi-eye"></i> View
+                    <td>
+                        <a asp-action="Details" asp-route-id="@c.Id"
+                           class="btn btn-sm btn-info">Details</a>
+
+                        <a asp-action="Edit" asp-route-id="@c.Id"
+                           class="btn btn-sm btn-warning">Edit</a>
+
+                        <a asp-action="Delete" asp-route-id="@c.Id"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Archive this customer?');">
+                            Delete
                         </a>
-                        <a asp-controller="Customer" asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-warning btn-sm me-2">
-                            <i class="bi bi-pencil"></i> Edit
-                        </a>
-                        <a asp-controller="Customer" asp-action="Delete" asp-route-id="@c.Id" class="btn btn-outline-danger btn-sm me-2">
-                            <i class="bi bi-trash"></i> Delete
-                        </a>
-
-                        @if (!c.IsArchived)
-                        {
-                            <form asp-action="Archive" asp-route-id="@c.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Archive">
-                                    <i class="bi bi-archive"></i> Archive
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-action="Unarchive" asp-route-id="@c.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-outline-success btn-sm" title="Restore">
-                                    <i class="bi bi-box-arrow-in-down"></i> Restore
-                                </button>
-                            </form>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center mt-5">
-            <i class="bi bi-person-x"></i> No customers found.
-        </div>
-    }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

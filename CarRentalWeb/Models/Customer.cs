@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Models
 {
@@ -24,13 +25,10 @@ namespace VehicleRentalWeb.Models
         [Display(Name = "Registration Type")]
         public RegistrationType RegistrationType { get; set; }
 
-        // This is the foreign key side
         public int? UserId { get; set; }
         public User? User { get; set; }
 
-        // Archive flag
         [Display(Name = "Archived")]
         public bool IsArchived { get; set; } = false;
-
     }
 }

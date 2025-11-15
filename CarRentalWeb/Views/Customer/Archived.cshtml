@@ -5,53 +5,57 @@
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4 fw-bold text-primary">
-        <i class="bi bi-archive me-2"></i>@ViewData["Title"]
-    </h2>
-
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-            <i class="bi bi-check-circle me-1"></i> @TempData["Message"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    <div class="text-center mb-4">
-        <a asp-action="Index" class="btn btn-outline-primary btn-lg me-2">
-            <i class="bi bi-arrow-left"></i> Back to Customers
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-danger mb-0">
+            <i class="bi bi-archive-fill me-2"></i>Archived Customers
+        </h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle me-1"></i> Back to Customers
         </a>
-    </div>
-
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var c in Model)
-        {
-            <div class="col">
-                <div class="card shadow border-0 h-100">
-                    <img src="@(string.IsNullOrEmpty(c.ImagePath) ? "/images/default_customer.jpg" : c.ImagePath)"
-                         class="card-img-top" style="object-fit:cover;height:220px;" alt="@c.Name" />
-                    <div class="card-body text-center">
-                        <h5 class="card-title fw-bold text-primary">@c.Name</h5>
-                        <p class="text-muted">@c.Email</p>
-                        <p>@c.Phone</p>
-                        <p class="text-muted small">@c.Address</p>
-                    </div>
-                    <div class="card-footer text-center bg-white border-0 pb-3">
-                        <form asp-action="Restore" asp-route-id="@c.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-success btn-sm">
-                                <i class="bi bi-arrow-counterclockwise"></i> Restore
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        }
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info text-center mt-5">
-            <i class="bi bi-person-x"></i> No archived customers found.
+        <div class="alert alert-secondary text-center py-5">
+            <i class="bi bi-inbox fs-1 mb-3 text-muted"></i>
+            <h5>No archived customers found.</h5>
+            <a asp-action="Index" class="btn btn-primary mt-3">Return to Customers</a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var c in Model)
+            {
+                <div class="col">
+                    <div class="card border-danger shadow-sm h-100">
+
+                        <div class="card-body">
+                            <h5 class="fw-bold text-danger">@c.Name</h5>
+                            <p class="text-muted small">
+                                <strong>Email:</strong> @c.Email<br />
+                                <strong>Phone:</strong> @c.Phone
+                            </p>
+                        </div>
+
+                        <div class="card-footer d-flex justify-content-between bg-light">
+                            <form asp-action="Restore" asp-route-id="@c.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
+                                </button>
+                            </form>
+
+                            <form asp-action="DeletePermanent" asp-route-id="@c.Id" method="post"
+                                  onsubmit="return confirm('⚠ This will permanently delete this customer. Continue?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            }
         </div>
     }
 </div>

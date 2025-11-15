@@ -1,99 +1,86 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using VehicleRentalWeb.Models;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
+using VehicleRentalWeb.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VehicleRentalWeb.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly RentalContext _context;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(RentalContext context)
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
         {
-            _context = context;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
-        // GET: /Account/Register
         [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View(new RegisterViewModel());
 
-        // POST: /Account/Register
         [HttpPost]
-        public IActionResult Register(User user)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(vm);
+
+            var user = new ApplicationUser
             {
-                // Check if username is taken
-                if (_context.Set<User>().Any(u => u.Username == user.Username))
-                {
-                    ModelState.AddModelError("", "Username already exists.");
-                    return View(user);
-                }
+                UserName = vm.Email,
+                Email = vm.Email,
+                DisplayName = vm.DisplayName
+            };
 
-                // Save the user
-                _context.Add(user);
-                _context.SaveChanges();
-
-                // Create linked customer profile if user is a normal customer
-                if (user.Role == "Customer")
-                {
-                    var newCustomer = new Customer
-                    {
-                        Name = user.Username,
-                        Email = $"{user.Username}@example.com",
-                        RegistrationType = RegistrationType.Online,
-                        UserId = user.Id
-                    };
-                    _context.Add(newCustomer);
-                    _context.SaveChanges();
-                }
-
-                TempData["Success"] = "Registration successful! You can now log in.";
-                return RedirectToAction("Login");
-            }
-            return View(user);
-        }
-
-        // GET: /Account/Login
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        // POST: /Account/Login
-        [HttpPost]
-        public IActionResult Login(string username, string password)
-        {
-            var user = _context.Set<User>()
-                .FirstOrDefault(u => u.Username == username && u.Password == password);
-
-            if (user != null)
+            var result = await _userManager.CreateAsync(user, vm.Password);
+            if (!result.Succeeded)
             {
-                // Save session info
-                HttpContext.Session.SetInt32("UserId", user.Id);
-                HttpContext.Session.SetString("Username", user.Username);
-                HttpContext.Session.SetString("Role", user.Role);
-
-                if (user.Role == "Admin")
-                    return RedirectToAction("Index", "AdminDashboard");
-                else
-                    return RedirectToAction("Index", "Home");
+                foreach (var e in result.Errors) ModelState.AddModelError("", e.Description);
+                return View(vm);
             }
 
-            ViewBag.Error = "Invalid username or password.";
-            return View();
+            // assign Customer role
+            await _userManager.AddToRoleAsync(user, "Customer");
+
+            // OPTIONAL: create linked Customer record if you want
+            // NOTE: you can create Customer table link here as well if desired
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/Logout
-        public IActionResult Logout()
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel vm)
         {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            if (!ModelState.IsValid) return View(vm);
+
+            var result = await _signInManager.PasswordSignInAsync(vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl))
+                    return Redirect(vm.ReturnUrl);
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", "Invalid login attempt.");
+            return View(vm);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied() => View();
     }
 }

@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using VehicleRentalWeb.Models;
-using System.IO;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class VehicleController : Controller
     {
         private readonly RentalContext _context;

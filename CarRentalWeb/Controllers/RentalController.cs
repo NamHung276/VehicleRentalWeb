@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 using VehicleRentalWeb.Models;
-using System.Linq;
 
 namespace VehicleRentalWeb.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class RentalController : Controller
     {
         private readonly RentalContext _context;
@@ -15,17 +17,31 @@ namespace VehicleRentalWeb.Controllers
             _context = context;
         }
 
-        // ---------------------- INDEX ----------------------
+        // ---------- INDEX (ACTIVE RENTALS) ----------
         public async Task<IActionResult> Index()
         {
             var rentals = await _context.Rentals
                 .Include(r => r.Customer)
                 .Include(r => r.Vehicle)
+                .Where(r => !r.IsArchived)
                 .ToListAsync();
+
             return View(rentals);
         }
 
-        // ---------------------- DETAILS ----------------------
+        // ---------- ARCHIVED ----------
+        public async Task<IActionResult> Archived()
+        {
+            var archived = await _context.Rentals
+                .Include(r => r.Customer)
+                .Include(r => r.Vehicle)
+                .Where(r => r.IsArchived)
+                .ToListAsync();
+
+            return View(archived);
+        }
+
+        // ---------- DETAILS ----------
         public async Task<IActionResult> Details(int id)
         {
             var rental = await _context.Rentals
@@ -33,25 +49,33 @@ namespace VehicleRentalWeb.Controllers
                 .Include(r => r.Vehicle)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (rental == null)
-                return NotFound();
+            if (rental == null) return NotFound();
 
             return View(rental);
         }
 
-        // ---------------------- CREATE (GET) ----------------------
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Vehicles = await _context.Vehicles
-                .Where(v => !v.IsRemoved && v.Status == "Available")
+            ViewBag.Customers = await _context.Customers
+                .Select(c => new {
+                    c.Id,
+                    Name = c.Name
+                })
                 .ToListAsync();
 
-            ViewBag.Customers = await _context.Customers.ToListAsync();
+            ViewBag.Vehicles = await _context.Vehicles
+                .Where(v => !v.IsRemoved && v.Status == "Available")
+                .Select(v => new {
+                    v.Id,
+                    Display = v.Make + " " + v.Model + " (" + v.Year + ")"
+                })
+                .ToListAsync();
+
             return View();
         }
 
-        // ---------------------- CREATE (POST) ----------------------
+        // ---------- CREATE (POST) ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Rental rental)
@@ -61,11 +85,11 @@ namespace VehicleRentalWeb.Controllers
                 ViewBag.Vehicles = await _context.Vehicles
                     .Where(v => !v.IsRemoved && v.Status == "Available")
                     .ToListAsync();
+
                 ViewBag.Customers = await _context.Customers.ToListAsync();
                 return View(rental);
             }
 
-            // Add rental to DB
             _context.Rentals.Add(rental);
 
             // Update vehicle status
@@ -73,7 +97,7 @@ namespace VehicleRentalWeb.Controllers
             if (vehicle != null)
             {
                 vehicle.Status = "Rented";
-                _context.Vehicles.Update(vehicle);
+                _context.Update(vehicle);
             }
 
             await _context.SaveChangesAsync();
@@ -82,33 +106,40 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ---------------------- EDIT ----------------------
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
-            if (rental == null)
-                return NotFound();
+            if (rental == null) return NotFound();
+
+            ViewBag.Customers = await _context.Customers
+                .Select(c => new {
+                    c.Id,
+                    Name = c.Name
+                })
+                .ToListAsync();
 
             ViewBag.Vehicles = await _context.Vehicles
                 .Where(v => !v.IsRemoved)
+                .Select(v => new {
+                    v.Id,
+                    Display = v.Make + " " + v.Model + " (" + v.Year + ")"
+                })
                 .ToListAsync();
-            ViewBag.Customers = await _context.Customers.ToListAsync();
+
             return View(rental);
         }
 
+        // ---------- EDIT (POST) ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Rental rental)
         {
-            if (id != rental.Id)
-                return NotFound();
+            if (id != rental.Id) return NotFound();
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Vehicles = await _context.Vehicles
-                    .Where(v => !v.IsRemoved)
-                    .ToListAsync();
+                ViewBag.Vehicles = await _context.Vehicles.Where(v => !v.IsRemoved).ToListAsync();
                 ViewBag.Customers = await _context.Customers.ToListAsync();
                 return View(rental);
             }
@@ -120,7 +151,7 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ---------------------- DELETE ----------------------
+        // ---------- DELETE (GET CONFIRM PAGE) ----------
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -129,69 +160,58 @@ namespace VehicleRentalWeb.Controllers
                 .Include(r => r.Vehicle)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (rental == null)
-                return NotFound();
+            if (rental == null) return NotFound();
 
             return View(rental);
         }
 
-        [HttpPost, ActionName("Delete")]
+        // ---------- ARCHIVE (SOFT DELETE) ----------
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
-            if (rental != null)
-            {
-                // Restore vehicle status
-                var vehicle = await _context.Vehicles.FindAsync(rental.VehicleId);
-                if (vehicle != null)
-                {
-                    vehicle.Status = "Available";
-                    _context.Vehicles.Update(vehicle);
-                }
+            if (rental == null) return NotFound();
 
-                _context.Rentals.Remove(rental);
-                await _context.SaveChangesAsync();
+            rental.IsArchived = true;
+            _context.Update(rental);
 
-                // Add TempData success message
-                TempData["Message"] = $"Rental ID {rental.Id} deleted successfully!";
-            }
+            await _context.SaveChangesAsync();
 
+            TempData["Message"] = $"Rental ID {id} archived successfully.";
             return RedirectToAction(nameof(Index));
         }
 
-        // ---------------------- ARCHIVE / UNARCHIVE ----------------------
-        // POST: /Rental/Archive/5
+        // ---------- RESTORE ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Archive(int id)
+        public async Task<IActionResult> Restore(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
-            if (rental != null)
-            {
-                rental.IsArchived = true;
-                _context.Rentals.Update(rental);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = $"Rental ID {rental.Id} archived successfully!";
-            }
-            return RedirectToAction(nameof(Index));
+            if (rental == null) return NotFound();
+
+            rental.IsArchived = false;
+            _context.Update(rental);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"Rental ID {id} restored!";
+            return RedirectToAction(nameof(Archived));
         }
 
-        // POST: /Rental/Unarchive/5
+        // ---------- DELETE PERMANENT ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Unarchive(int id)
+        public async Task<IActionResult> DeletePermanent(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
-            if (rental != null)
-            {
-                rental.IsArchived = false;
-                _context.Rentals.Update(rental);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = $"Rental ID {rental.Id} restored from archive!";
-            }
-            return RedirectToAction(nameof(Index));
-        }
+            if (rental == null) return NotFound();
 
+            _context.Rentals.Remove(rental);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"Rental ID {id} permanently deleted!";
+            return RedirectToAction(nameof(Archived));
+        }
     }
 }

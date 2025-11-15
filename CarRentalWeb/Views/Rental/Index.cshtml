@@ -1,105 +1,54 @@
 ﻿@model IEnumerable<VehicleRentalWeb.Models.Rental>
-
 @{
-    ViewData["Title"] = "Rental Transactions";
+    ViewData["Title"] = "Rental Management";
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4 fw-bold text-primary">
-        <i class="bi bi-card-checklist me-2"></i>@ViewData["Title"]
-    </h2>
+    <h2>Rental Management</h2>
 
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-            <i class="bi bi-check-circle me-1"></i> @TempData["Message"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <a asp-action="Create" class="btn btn-primary mb-3">+ Create Rental</a>
+    <a asp-action="Archived" class="btn btn-outline-danger mb-3 ms-2">
+        <i class="bi bi-archive-fill me-1"></i> View Archived
+    </a>
 
-    <div class="text-center mb-4">
-        <a asp-controller="Rental" asp-action="Create" class="btn btn-success btn-lg me-2">
-            <i class="bi bi-plus-circle"></i> Add New Rental
-        </a>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg me-2">
-            <i class="bi bi-house-door"></i> Back to Home
-        </a>
-        <a asp-action="Archived" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-archive"></i> View Archived
-        </a>
-    </div>
-
-    <table class="table table-striped table-hover align-middle shadow-sm">
+    <table class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
+                <th>Rental ID</th>
                 <th>Customer</th>
                 <th>Vehicle</th>
-                <th>Rental Source</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Total Cost ($)</th>
-                <th>Status</th>
-                <th class="text-center">Actions</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Total Cost</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var rental in Model)
+            @foreach (var r in Model)
             {
                 <tr>
-                    <td>@rental.Id</td>
-                    <td>@rental.Customer?.Name</td>
-                    <td>@rental.Vehicle?.Model</td>
-                    <td>@rental.Source</td>
-                    <td>@rental.StartDate.ToShortDateString()</td>
-                    <td>@rental.EndDate.ToShortDateString()</td>
-                    <td>@rental.TotalCost.ToString("0.00")</td>
-                    <td>
-                        @if (rental.IsActive)
-                        {
-                            <span class="badge bg-success">Active</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Completed</span>
-                        }
-                    </td>
-                    <td class="text-center">
-                        <a asp-controller="Rental" asp-action="Details" asp-route-id="@rental.Id" class="btn btn-sm btn-outline-primary me-1">
-                            <i class="bi bi-eye"></i> View
-                        </a>
-                        <a asp-controller="Rental" asp-action="Delete" asp-route-id="@rental.Id" class="btn btn-sm btn-outline-danger me-1">
-                            <i class="bi bi-trash"></i> Delete
-                        </a>
+                    <td>@r.Id</td>
+                    <td>@r.Customer?.Name</td>
+                    <td>@r.Vehicle?.Make @r.Vehicle?.Model</td>
+                    <td>@r.StartDate.ToShortDateString()</td>
+                    <td>@r.EndDate.ToShortDateString()</td>
+                    <td>@r.TotalCost.ToString("C")</td>
 
-                        @if (!rental.IsArchived)
-                        {
-                            <form asp-action="Archive" asp-route-id="@rental.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Archive">
-                                    <i class="bi bi-archive"></i> Archive
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-action="Unarchive" asp-route-id="@rental.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Restore">
-                                    <i class="bi bi-box-arrow-in-down"></i> Restore
-                                </button>
-                            </form>
-                        }
+                    <td>
+                        <a asp-action="Details" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-info">Details</a>
+
+                        <a asp-action="Edit" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-warning">Edit</a>
+
+                        <a asp-action="Delete" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Archive this rental?');">
+                            Delete
+                        </a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center mt-5">
-            <i class="bi bi-folder-x"></i> No rental records available.
-        </div>
-    }
 </div>

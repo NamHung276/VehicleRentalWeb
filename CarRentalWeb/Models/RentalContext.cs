@@ -1,25 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace VehicleRentalWeb.Models
 {
-    public class RentalContext : DbContext
+    public class RentalContext : IdentityDbContext<ApplicationUser>
     {
-        public RentalContext(DbContextOptions<RentalContext> options)
+        public RentalContext(DbContextOptions options)
             : base(options)
         {
         }
 
-        // --- Tables ---
-        public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<Car> Cars { get; set; }
-        public DbSet<Bike> Bikes { get; set; }
-        public DbSet<Truck> Trucks { get; set; }
+        // Tables
+        public DbSet<Vehicle> Vehicles { get; set; } = null!;
+        public DbSet<Car> Cars { get; set; } = null!;
+        public DbSet<Bike> Bikes { get; set; } = null!;
+        public DbSet<Truck> Trucks { get; set; } = null!;
+        public DbSet<Customer> Customers { get; set; } = null!;
+        public DbSet<Rental> Rentals { get; set; } = null!;
 
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Rental> Rentals { get; set; }
-        public DbSet<User> Users { get; set; }
-
-        // --- Model Configuration ---
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -31,26 +30,25 @@ namespace VehicleRentalWeb.Models
                 .HasValue<Bike>("Bike")
                 .HasValue<Truck>("Truck");
 
-            // Precision for RatePerDay
+            // Rate precision
             modelBuilder.Entity<Vehicle>()
                 .Property(v => v.RatePerDay)
                 .HasPrecision(18, 2);
 
-            // User–Customer (1-to-1)
+            // Customer <=> User
             modelBuilder.Entity<Customer>()
                 .HasOne(c => c.User)
-                .WithOne(u => u.Customer)
+                .WithOne()
                 .HasForeignKey<Customer>(c => c.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Customer–Rental (1-to-many)
+            // Rental relationships
             modelBuilder.Entity<Rental>()
                 .HasOne(r => r.Customer)
                 .WithMany()
                 .HasForeignKey(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Vehicle–Rental (1-to-many)
             modelBuilder.Entity<Rental>()
                 .HasOne(r => r.Vehicle)
                 .WithMany()
