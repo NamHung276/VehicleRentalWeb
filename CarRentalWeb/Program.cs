@@ -21,6 +21,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<RentalContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddTransient<IdentitySeeder>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

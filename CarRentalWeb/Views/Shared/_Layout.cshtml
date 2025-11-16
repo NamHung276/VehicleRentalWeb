@@ -83,10 +83,10 @@
 
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item text-danger"
-                                           asp-controller="Account" asp-action="Logout">
-                                            Logout
-                                        </a>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-link text-danger w-100 text-start">Logout</button>
+                                        </form>
                                     </li>
                                 </ul>
                             </li>
@@ -94,12 +94,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
 

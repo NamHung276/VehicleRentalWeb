@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Models
 {
@@ -25,8 +24,8 @@ namespace VehicleRentalWeb.Models
         [Display(Name = "Registration Type")]
         public RegistrationType RegistrationType { get; set; }
 
-        public int? UserId { get; set; }
-        public User? User { get; set; }
+        public string? UserId { get; set; }
+        public ApplicationUser? User { get; set; }
 
         [Display(Name = "Archived")]
         public bool IsArchived { get; set; } = false;
