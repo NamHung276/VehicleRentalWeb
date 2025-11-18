@@ -1,0 +1,51 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Rental>
+
+@{
+    ViewData["Title"] = "My Rental Requests";
+}
+
+<h2>My Rental Requests</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<table class="table table-bordered table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Vehicle</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Rental Fee</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Vehicle?.Make @r.Vehicle?.Model</td>
+                <td>@r.StartDate.ToShortDateString()</td>
+                <td>@r.EndDate.ToShortDateString()</td>
+                <td>
+                    @if (r.Status == VehicleRentalWeb.Models.RentalStatus.Pending)
+                    {
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    }
+                    else if (r.Status == VehicleRentalWeb.Models.RentalStatus.Approved)
+                    {
+                        <span class="badge bg-success">Approved</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Rejected</span>
+                    }
+                </td>
+                <td>$@r.RentalFee</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a class="btn btn-primary" asp-action="Create">Request New Rental</a>

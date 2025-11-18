@@ -34,10 +34,10 @@ namespace VehicleRentalWeb.Models
 
         public bool IsRemoved { get; set; } = false;
 
-        // ✅ Derived convenience
+        // Derived convenience
         public bool IsAvailable => Status == "Available";
 
-        // ✅ Each subclass must implement cost logic
+        // Each subclass must implement cost logic
         public abstract decimal CalculateCost(int days);
     }
 }

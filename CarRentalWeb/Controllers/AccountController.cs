@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using VehicleRentalWeb.Models;
 using VehicleRentalWeb.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 
 namespace VehicleRentalWeb.Controllers
 {
@@ -11,11 +11,16 @@ namespace VehicleRentalWeb.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RentalContext _context;
 
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public AccountController(
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            RentalContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -25,7 +30,8 @@ namespace VehicleRentalWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            if (!ModelState.IsValid)
+                return View(vm);
 
             var user = new ApplicationUser
             {
@@ -35,36 +41,56 @@ namespace VehicleRentalWeb.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, vm.Password);
+
             if (!result.Succeeded)
             {
-                foreach (var e in result.Errors) ModelState.AddModelError("", e.Description);
+                foreach (var e in result.Errors)
+                    ModelState.AddModelError("", e.Description);
                 return View(vm);
             }
 
-            // assign Customer role
+            // Assign Customer role
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            // OPTIONAL: create linked Customer record if you want
-            // NOTE: you can create Customer table link here as well if desired
+            // Create linked Customer record
+            var customer = new Customer
+            {
+                UserId = user.Id,
+                Name = vm.DisplayName,
+                Email = vm.Email,
+                Phone = vm.Phone,       // <-- FIXED
+                Address = vm.Address,   // <-- FIXED
+                ImagePath = "/images/default_customer.jpg",
+                RegistrationType = RegistrationType.Online,
+                IsArchived = false
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
 
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+        public IActionResult Login(string? returnUrl = null) =>
+            View(new LoginViewModel { ReturnUrl = returnUrl });
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            if (!ModelState.IsValid)
+                return View(vm);
 
-            var result = await _signInManager.PasswordSignInAsync(vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(
+                vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
+
             if (result.Succeeded)
             {
                 if (!string.IsNullOrEmpty(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl))
                     return Redirect(vm.ReturnUrl);
+
                 return RedirectToAction("Index", "Home");
             }
 

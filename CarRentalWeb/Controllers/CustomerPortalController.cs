@@ -28,7 +28,7 @@ public class CustomerPortalController : Controller
         // Safe nullable int check if CustomerId is int? type
         var rentals = await _context.Rentals
             .Include(r => r.Vehicle)
-            .Where(r => r.CustomerId.HasValue && r.CustomerId.Value.ToString() == user.Id) // adapt if CustomerId type differs
+            .Where(r => r.Customer != null && r.Customer.UserId == user.Id) // adapt if CustomerId type differs
             .ToListAsync();
 
         return View(rentals);

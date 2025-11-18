@@ -22,8 +22,9 @@ namespace VehicleRentalWeb.Models
         public string ImagePath { get; set; } = "/images/default_customer.jpg";
 
         [Display(Name = "Registration Type")]
-        public RegistrationType RegistrationType { get; set; }
+        public RegistrationType RegistrationType { get; set; } = RegistrationType.Online;
 
+        // Link to Identity user
         public string? UserId { get; set; }
         public ApplicationUser? User { get; set; }
 

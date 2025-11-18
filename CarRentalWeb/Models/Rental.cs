@@ -1,39 +1,56 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Models
 {
+    public enum RentalStatus
+    {
+        Pending,
+        Approved,
+        Rejected
+    }
+
     public class Rental
     {
         public int Id { get; set; }
 
-        [Display(Name = "Customer")]
-        public int? CustomerId { get; set; }
+        // FK - Customer
+        public int CustomerId { get; set; }
         public Customer? Customer { get; set; }
 
+        // FK - Vehicle
         [Display(Name = "Vehicle")]
-        public int? VehicleId { get; set; }
+        public int VehicleId { get; set; }
         public Vehicle? Vehicle { get; set; }
 
-        [Required, DataType(DataType.Date)]
+        [Required]
+        [Display(Name = "Start Date")]
         public DateTime StartDate { get; set; }
 
-        [Required, DataType(DataType.Date)]
+        [Required]
+        [Display(Name = "End Date")]
         public DateTime EndDate { get; set; }
 
-        [Range(0, 10000)]
-        [Display(Name = "Total Cost ($)")]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalCost { get; set; }
+        [Display(Name = "Rental Fee ($)")]
+        [Range(0, 100000)]
+        public decimal RentalFee { get; set; }
 
-        [Display(Name = "Rental Source")]
-        public RentalSource Source { get; set; }
+        // *** RESTORED FIELDS ***
+        public bool IsActive { get; set; } = false;
 
-        [Display(Name = "Is Active")]
-        public bool IsActive { get; set; }
+        public RegistrationType Source { get; set; } = RegistrationType.Online;
 
-        [Display(Name = "Archived")]
-        public bool IsArchived { get; set; } = false;
+        [NotMapped]
+        public decimal TotalCost =>
+            Vehicle != null
+                ? Vehicle.RatePerDay * (int)(EndDate - StartDate).TotalDays
+                : RentalFee;
+
+        [Display(Name = "Status")]
+        public RentalStatus Status { get; set; } = RentalStatus.Pending;
+
+        [Display(Name = "Created At")]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
