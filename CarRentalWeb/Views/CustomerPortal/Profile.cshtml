@@ -1,0 +1,18 @@
+﻿@model VehicleRentalWeb.Models.Customer
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h2>My Profile</h2>
+
+<div class="card mt-3 shadow-sm border-0">
+    <div class="card-body">
+
+        <p><strong>Name:</strong> @Model.Name</p>
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Phone:</strong> @Model.Phone</p>
+
+    </div>
+</div>

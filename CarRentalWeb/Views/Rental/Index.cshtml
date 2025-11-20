@@ -6,11 +6,6 @@
 <div class="container mt-4">
     <h2>Rental Management</h2>
 
-    <a asp-action="Create" class="btn btn-primary mb-3">+ Create Rental</a>
-    <a asp-action="Archived" class="btn btn-outline-danger mb-3 ms-2">
-        <i class="bi bi-archive-fill me-1"></i> View Archived
-    </a>
-
     <table class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
@@ -20,6 +15,7 @@
                 <th>Start</th>
                 <th>End</th>
                 <th>Total Cost</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -33,19 +29,20 @@
                     <td>@r.StartDate.ToShortDateString()</td>
                     <td>@r.EndDate.ToShortDateString()</td>
                     <td>@r.TotalCost.ToString("C")</td>
-
+                    <td>@r.Status</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@r.Id"
-                           class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-info">Details</a>
 
-                        <a asp-action="Edit" asp-route-id="@r.Id"
-                           class="btn btn-sm btn-warning">Edit</a>
-
-                        <a asp-action="Delete" asp-route-id="@r.Id"
-                           class="btn btn-sm btn-danger"
-                           onclick="return confirm('Archive this rental?');">
-                            Delete
-                        </a>
+                        @if (r.Status == VehicleRentalWeb.Models.RentalStatus.Pending)
+                        {
+                            <a asp-action="Approve" asp-route-id="@r.Id" class="btn btn-sm btn-success">Approve</a>
+                            <a asp-action="Reject" asp-route-id="@r.Id" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Reject this rental?');">Reject</a>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@r.Status</span>
+                        }
                     </td>
                 </tr>
             }

@@ -4,103 +4,101 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VehicleRentalWeb.Models;
 
-[Authorize(Roles = "Customer")]
-public class CustomerPortalController : Controller
+namespace VehicleRentalWeb.Controllers
 {
-    private readonly RentalContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public CustomerPortalController(RentalContext context, UserManager<ApplicationUser> userManager)
+    [Authorize(Roles = "Customer")]
+    public class CustomerPortalController : Controller
     {
-        _context = context;
-        _userManager = userManager;
-    }
+        private readonly RentalContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    // My rentals / Dashboard
-    public async Task<IActionResult> Dashboard()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return RedirectToAction("Login", "Account");
-
-        var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-        if (customer == null) return RedirectToAction("Index", "Home"); // or show message
-
-        var rentals = await _context.Rentals
-            .Include(r => r.Vehicle)
-            .Where(r => r.CustomerId == customer.Id)
-            .OrderByDescending(r => r.CreatedAt)
-            .ToListAsync();
-
-        return View(rentals);
-    }
-
-    // Browse available vehicles
-    public async Task<IActionResult> BrowseVehicles()
-    {
-        var vehicles = await _context.Vehicles
-            .Where(v => !v.IsRemoved && v.Status == "Available")
-            .ToListAsync();
-
-        return View(vehicles);
-    }
-
-    // Show rent request form (GET)
-    [HttpGet]
-    public async Task<IActionResult> Rent(int id)
-    {
-        var vehicle = await _context.Vehicles.FindAsync(id);
-        if (vehicle == null) return NotFound();
-
-        var model = new Rental
+        public CustomerPortalController(RentalContext context, UserManager<ApplicationUser> userManager)
         {
-            VehicleId = vehicle.Id,
-            Vehicle = vehicle,
-            StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddDays(1),
-            RentalFee = 0m
-        };
-
-        return View(model);
-    }
-
-    // Handle rent request submission (POST)
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Rent(Rental rental)
-    {
-        if (!ModelState.IsValid) return View(rental);
-
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return RedirectToAction("Login", "Account");
-
-        var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-        if (customer == null)
-        {
-            ModelState.AddModelError("", "Customer profile not found.");
-            return View(rental);
+            _context = context;
+            _userManager = userManager;
         }
 
-        var vehicle = await _context.Vehicles.FindAsync(rental.VehicleId);
-        if (vehicle == null)
+        // -------------------- HOME --------------------
+        public IActionResult Home()
         {
-            ModelState.AddModelError("", "Selected vehicle not found.");
-            return View(rental);
+            return View();
         }
 
-        // Calculate fee (min 1 day)
-        var days = (int)(rental.EndDate - rental.StartDate).TotalDays;
-        if (days < 1) days = 1;
-        rental.RentalFee = vehicle.RatePerDay * days;
+        // -------------------- MY RENTALS --------------------
+        public async Task<IActionResult> MyRentals()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
 
-        // Link customer and set initial status
-        rental.CustomerId = customer.Id;
-        rental.Status = RentalStatus.Pending;
-        rental.CreatedAt = DateTime.Now;
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
-        _context.Rentals.Add(rental);
-        await _context.SaveChangesAsync();
+            if (customer == null)
+            {
+                TempData["Error"] = "Customer profile not found.";
+                return RedirectToAction("Home");
+            }
 
-        TempData["Message"] = "Rental request sent. Admin will review and approve.";
-        return RedirectToAction(nameof(Dashboard));
+            var rentals = await _context.Rentals
+                .Include(r => r.Vehicle)
+                .Where(r => r.CustomerId == customer.Id)
+                .OrderByDescending(r => r.StartDate)
+                .ToListAsync();
+
+            return View(rentals);
+        }
+
+        // -------------------- BROWSE VEHICLES --------------------
+        public async Task<IActionResult> BrowseVehicles()
+        {
+            var list = await _context.Vehicles
+                .Where(v => !v.IsRemoved && v.Status == "Available")
+                .ToListAsync();
+
+            return View(list);
+        }
+
+        // -------------------- VEHICLE DETAILS --------------------
+        public async Task<IActionResult> VehicleDetails(int id)
+        {
+            var vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle == null) return NotFound();
+
+            return View(vehicle);
+        }
+
+        // -------------------- REQUEST RENTAL --------------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestRental(int vehicleId, DateTime startDate, DateTime endDate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (customer == null)
+            {
+                TempData["Error"] = "Your customer profile was not found.";
+                return RedirectToAction("BrowseVehicles");
+            }
+
+            var rental = new Rental
+            {
+                VehicleId = vehicleId,
+                CustomerId = customer.Id,
+                StartDate = startDate,
+                EndDate = endDate,
+                Status = RentalStatus.Pending
+            };
+
+            _context.Rentals.Add(rental);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Rental request submitted!";
+            return RedirectToAction("MyRentals");
+        }
+
     }
 }

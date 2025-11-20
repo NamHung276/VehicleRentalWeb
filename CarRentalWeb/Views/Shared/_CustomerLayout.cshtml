@@ -16,7 +16,7 @@
     <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
         <div class="container">
 
-            <a class="navbar-brand" asp-controller="CustomerPortal" asp-action="Dashboard">
+            <a class="navbar-brand" asp-controller="CustomerPortal" asp-action="Home">
                 Customer Portal
             </a>
 
@@ -26,12 +26,24 @@
 
             <div class="collapse navbar-collapse" id="customerNav">
                 <ul class="navbar-nav me-auto">
+
+                    <!-- HOME -->
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="Dashboard">My Rentals</a>
+                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="Home">Home</a>
                     </li>
+
+                    <!-- MY RENTALS -->
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a>
+                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="MyRentals">My Rentals</a>
                     </li>
+
+                    <!-- BROWSE VEHICLES -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">
+                            Browse Vehicles
+                        </a>
+                    </li>
+
                 </ul>
 
                 <ul class="navbar-nav ms-auto">
@@ -40,6 +52,7 @@
                             @User?.Identity?.Name
                         </a>
                     </li>
+
                     <li class="nav-item">
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                             @Html.AntiForgeryToken()

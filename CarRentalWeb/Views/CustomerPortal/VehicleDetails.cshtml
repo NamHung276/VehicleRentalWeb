@@ -1,0 +1,42 @@
+﻿@model VehicleRentalWeb.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Vehicle Details";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h2>@Model.Make @Model.Model</h2>
+
+<div class="card mt-3 shadow-sm border-0">
+    <div class="card-body">
+
+        <p><strong>Year:</strong> @Model.Year</p>
+        <p>
+            <strong>Rate per Day:</strong> $@Model.RatePerDay
+        </p>
+
+        <hr />
+
+        <h4>Request Rental</h4>
+
+        <form asp-action="RequestRental" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="vehicleId" value="@Model.Id" />
+
+            <div class="mb-3">
+                <label>Start Date</label>
+                <input type="date" name="startDate" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label>End Date</label>
+                <input type="date" name="endDate" class="form-control" required />
+            </div>
+
+            <button class="btn btn-success">Submit Rental Request</button>
+            <a asp-action="BrowseVehicles" class="btn btn-secondary">Back</a>
+        </form>
+
+    </div>
+</div>

@@ -1,23 +1,21 @@
 ﻿@model IEnumerable<VehicleRentalWeb.Models.Vehicle>
+
 @{
-    Layout = "_CustomerLayout";
     ViewData["Title"] = "Browse Vehicles";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h2>Browse Vehicles</h2>
+<h2>Available Vehicles</h2>
 
-<div class="row">
+<div class="row mt-3">
     @foreach (var v in Model)
     {
         <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <img src="@v.ImagePath" class="card-img-top" alt="@v.Make @v.Model" style="height:180px; object-fit:cover;">
+            <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="card-title">@v.Make @v.Model</h5>
-                    <p class="card-text">Year: @v.Year<br />Rate / day: @v.RatePerDay.ToString("C")</p>
-                    <p>
-                        <a asp-action="Rent" asp-route-id="@v.Id" class="btn btn-sm btn-success">Request Rental</a>
-                    </p>
+                    <h4>@v.Make @v.Model</h4>
+                    <p>@v.Year</p>
+                    <a asp-action="VehicleDetails" asp-route-id="@v.Id" class="btn btn-primary">View</a>
                 </div>
             </div>
         </div>
