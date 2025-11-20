@@ -23,8 +23,12 @@ namespace VehicleRentalWeb.Controllers
             _context = context;
         }
 
+        // --------------------------
+        // REGISTER
+        // --------------------------
         [HttpGet]
         public IActionResult Register() => View(new RegisterViewModel());
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -52,14 +56,14 @@ namespace VehicleRentalWeb.Controllers
             // Assign Customer role
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            // Create linked Customer record
+            // Customer profile
             var customer = new Customer
             {
                 UserId = user.Id,
                 Name = vm.DisplayName,
                 Email = vm.Email,
-                Phone = vm.Phone,       // <-- FIXED
-                Address = vm.Address,   // <-- FIXED
+                Phone = vm.Phone,
+                Address = vm.Address,
                 ImagePath = "/images/default_customer.jpg",
                 RegistrationType = RegistrationType.Online,
                 IsArchived = false
@@ -68,13 +72,20 @@ namespace VehicleRentalWeb.Controllers
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Home");
+            // Auto-login after register
+            await _signInManager.SignInAsync(user, false);
+
+            // Redirect to CustomerPortal
+            return RedirectToAction("Home", "CustomerPortal");
         }
 
+        // --------------------------
+        // LOGIN
+        // --------------------------
         [HttpGet]
         public IActionResult Login(string? returnUrl = null) =>
             View(new LoginViewModel { ReturnUrl = returnUrl });
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -84,20 +95,40 @@ namespace VehicleRentalWeb.Controllers
                 return View(vm);
 
             var result = await _signInManager.PasswordSignInAsync(
-                vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
+                vm.Email,
+                vm.Password,
+                vm.RememberMe,
+                false);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                if (!string.IsNullOrEmpty(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl))
-                    return Redirect(vm.ReturnUrl);
-
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(vm);
             }
 
-            ModelState.AddModelError("", "Invalid login attempt.");
-            return View(vm);
+            // Get user safely
+            var user = await _userManager.FindByEmailAsync(vm.Email);
+            if (user == null)
+            {
+                await _signInManager.SignOutAsync();
+                ModelState.AddModelError("", "User account could not be loaded.");
+                return View(vm);
+            }
+
+            // Role-based redirect
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction("Index", "AdminDashboard");
+
+            if (await _userManager.IsInRoleAsync(user, "Customer"))
+                return RedirectToAction("Home", "CustomerPortal");
+
+            // fallback
+            return RedirectToAction("Index", "Home");
         }
 
+        // --------------------------
+        // LOGOUT
+        // --------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

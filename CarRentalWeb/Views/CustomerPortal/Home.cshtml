@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Customer Home";
+}
+
+<div class="text-center mt-5">
+    <h1 class="fw-bold text-primary mb-3">Welcome to Vehicle Rental</h1>
+    <p class="lead text-secondary mb-4">
+        Book vehicles quickly and view your rental history.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3">
+        <a asp-controller="CustomerPortal" asp-action="BrowseVehicles"
+           class="btn btn-primary btn-lg">Browse Vehicles</a>
+
+        <a asp-controller="CustomerPortal" asp-action="Dashboard"
+           class="btn btn-outline-primary btn-lg">My Rentals</a>
+    </div>
+</div>
+
+<div class="container mt-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-4">
+            <div class="feature-box">
+                <h4 class="fw-bold text-primary">Book a Vehicle</h4>
+                <p>Choose from a variety of available cars.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="feature-box">
+                <h4 class="fw-bold text-primary">View Your Rentals</h4>
+                <p>Track active and past rentals easily.</p>
+            </div>
+        </div>
+    </div>
+</div>

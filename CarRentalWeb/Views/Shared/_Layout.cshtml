@@ -24,25 +24,38 @@
                     Vehicle Rental
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#mainNavbar">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                     <ul class="navbar-nav">
 
-                        <!-- Always-visible -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-
-                        @* Null-safe check for authenticated user and roles *@
+                        @* ROLE HELPERS *@
                         @{
                             var isAuthenticated = User?.Identity?.IsAuthenticated == true;
                             var isAdmin = User?.IsInRole("Admin") == true;
                             var isCustomer = User?.IsInRole("Customer") == true;
                         }
+
+                        <!-- HOME (Role Based) -->
+                        <li class="nav-item">
+                            @if (isAdmin)
+                            {
+                                <a class="nav-link text-dark"
+                                   asp-controller="AdminDashboard" asp-action="Index">Home</a>
+                            }
+                            else if (isCustomer)
+                            {
+                                <a class="nav-link text-dark"
+                                   asp-controller="CustomerPortal" asp-action="Home">Home</a>
+                            }
+                            else
+                            {
+                                <a class="nav-link text-dark"
+                                   asp-controller="Home" asp-action="Index">Home</a>
+                            }
+                        </li>
 
                         <!-- ADMIN NAVIGATION -->
                         @if (isAdmin)
@@ -65,9 +78,13 @@
                         @if (isCustomer)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="Index">
-                                    My Rentals
-                                </a>
+                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="Dashboard">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="CustomerRental" asp-action="MyRequests">My Rentals</a>
                             </li>
                         }
 
@@ -75,17 +92,20 @@
                         @if (isAuthenticated)
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-primary"
-                                   href="#" id="userDropdown" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle text-primary" href="#" id="userDropdown"
+                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     @User?.Identity?.Name
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
+                                        <form asp-controller="Account" asp-action="Logout"
+                                              method="post" class="dropdown-item p-0">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-link text-danger w-100 text-start">Logout</button>
+                                            <button type="submit"
+                                                    class="btn btn-link text-danger w-100 text-start">
+                                                Logout
+                                            </button>
                                         </form>
                                     </li>
                                 </ul>
@@ -100,10 +120,8 @@
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
-
                     </ul>
                 </div>
-
             </div>
         </nav>
     </header>
@@ -126,5 +144,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
