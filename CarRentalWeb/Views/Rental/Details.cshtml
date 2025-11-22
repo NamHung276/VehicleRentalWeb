@@ -4,30 +4,28 @@
     ViewData["Title"] = "Rental Details";
 }
 
-<h2 class="fw-bold mb-3 text-primary">@ViewData["Title"]</h2>
+<h2 class="fw-bold mb-3">@ViewData["Title"]</h2>
 
-<div class="card shadow-lg border-0 p-4 bg-light">
+<div class="card shadow p-4">
     <div class="row g-4">
         <div class="col-md-6">
-            <h4 class="text-primary mb-3">Rental Summary</h4>
-            <p><strong>Rental ID:</strong> #@Model.Id</p>
+            <h4>Rental Summary</h4>
+            <p><strong>ID:</strong> #@Model.Id</p>
             <p><strong>Customer:</strong> @Model.Customer?.Name</p>
             <p><strong>Vehicle:</strong> @Model.Vehicle?.Make @Model.Vehicle?.Model</p>
-            <p><strong>Source:</strong> @Model.Source</p>
             <p><strong>Start Date:</strong> @Model.StartDate.ToShortDateString()</p>
             <p><strong>End Date:</strong> @Model.EndDate.ToShortDateString()</p>
+            <p><strong>Status:</strong> @(Model.IsActive ? "Active" : "Completed")</p>
         </div>
 
         <div class="col-md-6">
-            <h4 class="text-primary mb-3">Payment Info</h4>
+            <h4>Payment Info</h4>
             <p><strong>Total Cost:</strong> $@Model.TotalCost.ToString("0.00")</p>
-            <p><strong>Status:</strong> @(Model.IsActive ? "Active" : "Completed")</p>
+            <p><strong>Payment Status:</strong> @Model.PaymentStatus</p>
         </div>
     </div>
 
     <div class="mt-4 text-end">
-        <a asp-controller="Rental" asp-action="Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
     </div>
 </div>

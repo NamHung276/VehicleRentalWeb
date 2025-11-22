@@ -1,0 +1,65 @@
+﻿@model IEnumerable<VehicleRentalWeb.Models.Rental>
+@{
+    ViewData["Title"] = "My Requests";
+}
+
+<div class="container mt-4">
+    <h2>My Rental Requests</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vehicle</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Id</td>
+                    <td>@r.Vehicle?.Make @r.Vehicle?.Model</td>
+                    <td>@r.StartDate.ToShortDateString()</td>
+                    <td>@r.EndDate.ToShortDateString()</td>
+                    <td>@r.TotalCost.ToString("C")</td>
+                    <td>@r.Status</td>
+                    <td>
+                        @if (r.PaymentStatus == PaymentStatus.Pending)
+                        {
+                            <form asp-controller="CustomerPortal" asp-action="PayRental" asp-route-id="@r.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-warning">Pay Now</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Paid</span>
+                        }
+
+                        @if ((r.Status == RentalStatus.Pending || r.Status == RentalStatus.Approved) && r.PaymentStatus != PaymentStatus.Paid)
+                        {
+                            <form asp-controller="CustomerRental" asp-action="CancelRental" asp-route-id="@r.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

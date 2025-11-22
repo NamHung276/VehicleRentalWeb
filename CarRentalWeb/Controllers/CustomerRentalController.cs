@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using VehicleRentalWeb.Models;
 
 namespace VehicleRentalWeb.Controllers
@@ -18,16 +21,14 @@ namespace VehicleRentalWeb.Controllers
             _userManager = userManager;
         }
 
-        // =====================================================
-        // VIEW ALL RENTALS OF THE CURRENT CUSTOMER
-        // =====================================================
+        // View my rentals
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (customer == null) return NotFound("Customer profile not found.");
+            if (customer == null) return NotFound();
 
             var rentals = await _context.Rentals
                 .Include(r => r.Vehicle)
@@ -38,23 +39,17 @@ namespace VehicleRentalWeb.Controllers
             return View(rentals);
         }
 
-        // =====================================================
-        // CREATE RENTAL (GET)
-        // =====================================================
+        // Create rental (GET)
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             ViewBag.Vehicles = await _context.Vehicles
                 .Where(v => !v.IsRemoved && v.Status == "Available")
-                .OrderBy(v => v.Make)
                 .ToListAsync();
-
             return View();
         }
 
-        // =====================================================
-        // CREATE RENTAL (POST)
-        // =====================================================
+        // Create rental (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Rental rental)
@@ -63,48 +58,42 @@ namespace VehicleRentalWeb.Controllers
             if (user == null) return Unauthorized();
 
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (customer == null) return NotFound("Customer profile not found.");
+            if (customer == null) return NotFound();
 
-            // Re-populate dropdown if validation fails
             ViewBag.Vehicles = await _context.Vehicles
                 .Where(v => !v.IsRemoved && v.Status == "Available")
                 .ToListAsync();
 
-            // Validate rental dates
             if (rental.EndDate <= rental.StartDate)
             {
                 ModelState.AddModelError("", "End date must be later than start date.");
                 return View(rental);
             }
 
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == rental.VehicleId);
-
+            var vehicle = await _context.Vehicles.FindAsync(rental.VehicleId);
             if (vehicle == null || vehicle.IsRemoved || vehicle.Status != "Available")
             {
-                ModelState.AddModelError("", "This vehicle cannot be rented.");
+                ModelState.AddModelError("", "Vehicle not available.");
                 return View(rental);
             }
 
-            // Calculate rental fee
             int days = (int)(rental.EndDate - rental.StartDate).TotalDays;
             if (days < 1) days = 1;
-
-            rental.RentalFee = vehicle.RatePerDay * days;
+            rental.TotalCost = vehicle.RatePerDay * days; // <-- corrected
 
             rental.CustomerId = customer.Id;
             rental.Status = RentalStatus.Pending;
+            rental.PaymentStatus = PaymentStatus.Pending;
             rental.CreatedAt = DateTime.Now;
 
             _context.Rentals.Add(rental);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Rental request submitted successfully!";
-            return RedirectToAction("Home", "CustomerPortal");
+            TempData["Message"] = "Rental request submitted! Please pay to confirm.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // =====================================================
-        // CANCEL RENTAL (ONLY PENDING)
-        // =====================================================
+        // Cancel rental
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelRental(int id)
@@ -113,21 +102,34 @@ namespace VehicleRentalWeb.Controllers
             if (user == null) return Unauthorized();
 
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (customer == null) return NotFound("Customer profile not found.");
+            if (customer == null) return NotFound();
 
-            var rental = await _context.Rentals
+            var rental = await _context.Rentals.Include(r => r.Vehicle)
                 .FirstOrDefaultAsync(r => r.Id == id && r.CustomerId == customer.Id);
 
-            if (rental == null || rental.Status != RentalStatus.Pending)
+            if (rental == null)
             {
-                TempData["Error"] = "This rental cannot be cancelled.";
+                TempData["Error"] = "Rental not found.";
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.Rentals.Remove(rental);
+            if (rental.PaymentStatus == PaymentStatus.Paid)
+            {
+                TempData["Error"] = "Cannot cancel a paid rental. Contact admin.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (DateTime.Now >= rental.StartDate)
+            {
+                TempData["Error"] = "Cannot cancel a rental that has already started.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            rental.Status = RentalStatus.Cancelled;
+            _context.Rentals.Update(rental);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Pending rental cancelled successfully.";
+            TempData["Message"] = "Rental cancelled.";
             return RedirectToAction(nameof(Index));
         }
     }

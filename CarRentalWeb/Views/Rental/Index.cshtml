@@ -6,16 +6,26 @@
 <div class="container mt-4">
     <h2>Rental Management</h2>
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
     <table class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
-                <th>Rental ID</th>
+                <th>ID</th>
                 <th>Customer</th>
                 <th>Vehicle</th>
                 <th>Start</th>
                 <th>End</th>
-                <th>Total Cost</th>
+                <th>Total</th>
                 <th>Status</th>
+                <th>Payment</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -31,13 +41,21 @@
                     <td>@r.TotalCost.ToString("C")</td>
                     <td>@r.Status</td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-info">Details</a>
-
-                        @if (r.Status == VehicleRentalWeb.Models.RentalStatus.Pending)
+                        @if (r.PaymentStatus == PaymentStatus.Paid)
                         {
-                            <a asp-action="Approve" asp-route-id="@r.Id" class="btn btn-sm btn-success">Approve</a>
-                            <a asp-action="Reject" asp-route-id="@r.Id" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Reject this rental?');">Reject</a>
+                            <span class="badge bg-success">Paid</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Unpaid</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-info btn-sm">Details</a>
+                        @if (r.Status == RentalStatus.Pending)
+                        {
+                            <a asp-action="Approve" asp-route-id="@r.Id" class="btn btn-success btn-sm">Approve</a>
+                            <a asp-action="Reject" asp-route-id="@r.Id" class="btn btn-danger btn-sm" onclick="return confirm('Reject this rental?');">Reject</a>
                         }
                         else
                         {

@@ -4,53 +4,48 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VehicleRentalWeb.Models
 {
-    public enum RentalStatus
-    {
-        Pending,
-        Approved,
-        Rejected
-    }
-
     public class Rental
     {
         public int Id { get; set; }
 
-        // FK - Customer
-        public int CustomerId { get; set; }
-        public Customer? Customer { get; set; }
-
-        // FK - Vehicle
-        [Display(Name = "Vehicle")]
-        public int VehicleId { get; set; }
-        public Vehicle? Vehicle { get; set; }
-
+        // Foreign keys
         [Required]
-        [Display(Name = "Start Date")]
+        public int CustomerId { get; set; }
+        [Required]
+        public int VehicleId { get; set; }
+
+        // Navigation properties
+        public Customer Customer { get; set; } = null!;  // EF will populate
+        public Vehicle Vehicle { get; set; } = null!;    // EF will populate
+
+        // Rental period
+        [Required]
         public DateTime StartDate { get; set; }
 
         [Required]
-        [Display(Name = "End Date")]
         public DateTime EndDate { get; set; }
 
-        [Display(Name = "Rental Fee ($)")]
-        [Range(0, 100000)]
-        public decimal RentalFee { get; set; }
+        // Total cost, writable for calculation
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalCost { get; set; }
 
-        // *** RESTORED FIELDS ***
-        public bool IsActive { get; set; } = false;
-
-        public RegistrationType Source { get; set; } = RegistrationType.Online;
-
-        [NotMapped]
-        public decimal TotalCost =>
-            Vehicle != null
-                ? Vehicle.RatePerDay * (int)(EndDate - StartDate).TotalDays
-                : RentalFee;
-
-        [Display(Name = "Status")]
+        // Statuses
+        [Required]
         public RentalStatus Status { get; set; } = RentalStatus.Pending;
 
-        [Display(Name = "Created At")]
+        [Required]
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+
+        // Payment info
+        public DateTime? PaymentDate { get; set; }
+        public string? TransactionId { get; set; }  // null until payment
+
+        // Audit
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Computed property
+        [NotMapped]
+        public bool IsActive => Status == RentalStatus.Pending || Status == RentalStatus.Approved;
     }
 }

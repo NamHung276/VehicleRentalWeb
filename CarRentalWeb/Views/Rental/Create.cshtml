@@ -4,27 +4,16 @@
     ViewData["Title"] = "Add New Rental";
 }
 
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css" />
-
 <h2 class="mb-4">@ViewData["Title"]</h2>
 
 <div class="card shadow p-4">
     <form asp-action="Create" method="post" class="needs-validation" novalidate>
-
         <div class="row">
-
             <!-- Customer -->
             <div class="col-md-6 mb-3">
                 <label class="form-label">Select Customer</label>
-                <select asp-for="CustomerId"
-                        class="form-select selectpicker"
-                        data-live-search="true"
-                        title="Choose a customer...">
-                    @foreach (var c in ViewBag.Customers)
-                    {
-                        <option value="@c.Id">@c.Name</option>
-                    }
+                <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.Customers">
+                    <option value="">-- Choose a customer --</option>
                 </select>
                 <span asp-validation-for="CustomerId" class="text-danger"></span>
             </div>
@@ -32,18 +21,11 @@
             <!-- Vehicle -->
             <div class="col-md-6 mb-3">
                 <label class="form-label">Select Vehicle</label>
-                <select asp-for="VehicleId"
-                        class="form-select selectpicker"
-                        data-live-search="true"
-                        title="Choose a vehicle...">
-                    @foreach (var v in ViewBag.Vehicles)
-                    {
-                        <option value="@v.Id">@v.Display</option>
-                    }
+                <select asp-for="VehicleId" class="form-select" asp-items="ViewBag.Vehicles">
+                    <option value="">-- Choose a vehicle --</option>
                 </select>
                 <span asp-validation-for="VehicleId" class="text-danger"></span>
             </div>
-
         </div>
 
         <!-- Dates -->
@@ -53,7 +35,6 @@
                 <input asp-for="StartDate" type="date" class="form-control" />
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
-
             <div class="col-md-6 mb-3">
                 <label asp-for="EndDate" class="form-label"></label>
                 <input asp-for="EndDate" type="date" class="form-control" />
@@ -68,29 +49,14 @@
             <span asp-validation-for="TotalCost" class="text-danger"></span>
         </div>
 
-        <!-- Active -->
-        <div class="form-check mb-3">
-            <input asp-for="IsActive" class="form-check-input" />
-            <label asp-for="IsActive" class="form-check-label"></label>
-        </div>
-
-        <!-- Source Enum -->
-        <div class="mb-3">
-            <label asp-for="Source" class="form-label"></label>
-            <select asp-for="Source" class="form-select"
-                    asp-items="Html.GetEnumSelectList<VehicleRentalWeb.Models.RentalSource>()"></select>
-        </div>
-
         <div class="d-flex justify-content-end">
             <a asp-action="Index" class="btn btn-secondary me-2">Cancel</a>
             <button class="btn btn-primary" type="submit">Save Rental</button>
         </div>
-
     </form>
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

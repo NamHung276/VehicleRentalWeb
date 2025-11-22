@@ -292,13 +292,10 @@ namespace VehicleRentalWeb.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<decimal>("RentalFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Source")
+                    b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -306,6 +303,12 @@ namespace VehicleRentalWeb.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");

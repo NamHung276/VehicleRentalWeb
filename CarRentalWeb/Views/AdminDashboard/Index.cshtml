@@ -63,7 +63,7 @@
             <tr>
                 <td>@rental.Id</td>
                 <td>@rental.Customer?.Name</td>
-                <td>@rental.VehicleId</td>
+                <td>@rental.Vehicle?.Make @rental.Vehicle?.Model</td>
                 <td>@rental.StartDate.ToShortDateString()</td>
                 <td>@rental.EndDate.ToShortDateString()</td>
                 <td>

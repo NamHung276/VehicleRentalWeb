@@ -18,12 +18,13 @@
     <table class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
-                <th>Rental ID</th>
+                <th>ID</th>
                 <th>Vehicle</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Total Cost</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Total</th>
                 <th>Status</th>
+                <th>Payment</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -38,16 +39,24 @@
                     <td>@r.TotalCost.ToString("C")</td>
                     <td>@r.Status</td>
                     <td>
-                        @* Show Cancel button only for Pending rentals *@
-                        @if (r.Status == VehicleRentalWeb.Models.RentalStatus.Pending)
+                        @if (r.PaymentStatus == PaymentStatus.Pending)
                         {
-                            <form asp-action="CancelRental" method="post" class="d-inline">
+                            <form asp-controller="CustomerPortal" asp-action="PayRental" asp-route-id="@r.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@r.Id" />
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure you want to cancel this rental?');">
-                                    Cancel
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-warning">Pay Now</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Paid</span>
+                        }
+                    </td>
+                    <td>
+                        @if ((r.Status == RentalStatus.Pending || r.Status == RentalStatus.Approved) && r.PaymentStatus != PaymentStatus.Paid)
+                        {
+                            <form asp-controller="CustomerRental" asp-action="CancelRental" asp-route-id="@r.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this rental?');">Cancel</button>
                             </form>
                         }
                         else
