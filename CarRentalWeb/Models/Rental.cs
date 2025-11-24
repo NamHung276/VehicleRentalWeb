@@ -11,6 +11,7 @@ namespace VehicleRentalWeb.Models
         // Foreign keys
         [Required]
         public int CustomerId { get; set; }
+
         [Required]
         public int VehicleId { get; set; }
 
@@ -38,7 +39,7 @@ namespace VehicleRentalWeb.Models
 
         // Payment info
         public DateTime? PaymentDate { get; set; }
-        public string? TransactionId { get; set; }  // null until payment
+        public string? TransactionId { get; set; }
 
         // Audit
         [Required]

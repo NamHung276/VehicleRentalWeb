@@ -34,25 +34,24 @@ namespace VehicleRentalWeb.Controllers
         // ---------- DETAILS ----------
         public async Task<IActionResult> Details(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers
+                .Include(c => c.Rentals) // include rentals for details if needed
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (customer == null) return NotFound();
 
             return View(customer);
         }
 
         // ---------- CREATE (GET) ----------
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // ---------- CREATE (POST) ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Customer customer, IFormFile? ImageFile)
         {
-            if (!ModelState.IsValid)
-                return View(customer);
+            if (!ModelState.IsValid) return View(customer);
 
             // Image upload
             if (ImageFile != null && ImageFile.Length > 0)
@@ -74,6 +73,7 @@ namespace VehicleRentalWeb.Controllers
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Customer created successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -92,9 +92,7 @@ namespace VehicleRentalWeb.Controllers
         public async Task<IActionResult> Edit(int id, Customer customer, IFormFile? ImageFile)
         {
             if (id != customer.Id) return NotFound();
-
-            if (!ModelState.IsValid)
-                return View(customer);
+            if (!ModelState.IsValid) return View(customer);
 
             var existing = await _context.Customers.FindAsync(id);
             if (existing == null) return NotFound();
@@ -118,9 +116,29 @@ namespace VehicleRentalWeb.Controllers
                 existing.ImagePath = "/images/customers/" + fileName;
             }
 
+            // --------------------------------------------------------
+            // SYNC WITH ASP.NET IDENTITY USER TABLE
+            // --------------------------------------------------------
+            if (!string.IsNullOrEmpty(existing.UserId))
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == existing.UserId);
+
+                if (user != null)
+                {
+                    user.DisplayName = existing.Name;
+                    user.Email = existing.Email;
+                    user.UserName = existing.Email; // required by Identity
+                    user.PhoneNumber = existing.Phone;
+
+                    _context.Users.Update(user);
+                }
+            }
+            // --------------------------------------------------------
+
             _context.Customers.Update(existing);
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Customer updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -133,6 +151,7 @@ namespace VehicleRentalWeb.Controllers
             customer.IsArchived = true;
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Customer archived successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -157,6 +176,7 @@ namespace VehicleRentalWeb.Controllers
             customer.IsArchived = false;
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Customer restored successfully!";
             return RedirectToAction(nameof(Archived));
         }
 
@@ -165,12 +185,22 @@ namespace VehicleRentalWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePermanent(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers
+                .Include(c => c.Rentals) // include rentals to delete
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (customer == null) return NotFound();
+
+            // Remove related rentals first to avoid FK issues
+            if (customer.Rentals != null && customer.Rentals.Any())
+            {
+                _context.Rentals.RemoveRange(customer.Rentals);
+            }
 
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Customer and related rentals permanently deleted!";
             return RedirectToAction(nameof(Archived));
         }
     }

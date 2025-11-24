@@ -3,73 +3,69 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>Register</h2>
+<h2 class="mb-3">Register</h2>
 
 <form asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
 
-    <!-- SHOW IDENTITY ERRORS -->
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
     <div class="mb-3">
-        <label asp-for="DisplayName"></label>
+        <label asp-for="DisplayName" class="form-label"></label>
         <input asp-for="DisplayName" class="form-control" />
         <span asp-validation-for="DisplayName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Password"></label>
+        <label asp-for="Password" class="form-label"></label>
         <input asp-for="Password" id="passwordInput" type="password" autocomplete="new-password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
 
-        <!-- PASSWORD REQUIREMENT CHECKLIST -->
+        <!-- PASSWORD RULES -->
         <ul class="mt-2 small" id="passwordRules" style="list-style:none; padding-left:0;">
             <li id="rule-length" class="text-danger">✘ At least 6 characters</li>
             <li id="rule-lower" class="text-danger">✘ At least one lowercase letter</li>
             <li id="rule-upper" class="text-danger">✘ At least one uppercase letter</li>
             <li id="rule-number" class="text-danger">✘ At least one number</li>
-            <!-- NO SYMBOL RULE because RequireNonAlphanumeric = false -->
         </ul>
 
-        <!-- PASSWORD STRENGTH INDICATOR -->
         <small id="passwordStrength" class="fw-bold"></small>
     </div>
 
     <div class="mb-3">
-        <label asp-for="ConfirmPassword"></label>
+        <label asp-for="ConfirmPassword" class="form-label"></label>
         <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="form-control" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Phone"></label>
+        <label asp-for="Phone" class="form-label"></label>
         <input asp-for="Phone" class="form-control" />
         <span asp-validation-for="Phone" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Address"></label>
+        <label asp-for="Address" class="form-label"></label>
         <input asp-for="Address" class="form-control" />
         <span asp-validation-for="Address" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary">Register</button>
+    <button class="btn btn-primary w-100">Register</button>
 </form>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script>
-
         const pwd = document.getElementById("passwordInput");
         const strengthText = document.getElementById("passwordStrength");
 
-        // RULE ELEMENTS WITH FIXED LABELS
         const rules = {
             length: { el: document.getElementById("rule-length"), label: "At least 6 characters" },
             lower:  { el: document.getElementById("rule-lower"),  label: "At least one lowercase letter" },
@@ -77,33 +73,30 @@
             number: { el: document.getElementById("rule-number"), label: "At least one number" }
         };
 
-        pwd.addEventListener("input", function () {
+        pwd.addEventListener("input", () => {
             const v = pwd.value;
 
             updateRule(rules.length.el, rules.length.label, v.length >= 6);
-            updateRule(rules.lower.el, rules.lower.label, /[a-z]/.test(v));
-            updateRule(rules.upper.el, rules.upper.label, /[A-Z]/.test(v));
+            updateRule(rules.lower.el,  rules.lower.label,  /[a-z]/.test(v));
+            updateRule(rules.upper.el,  rules.upper.label,  /[A-Z]/.test(v));
             updateRule(rules.number.el, rules.number.label, /[0-9]/.test(v));
 
-            // Update strength meter
             strengthText.textContent = getStrength(v);
             strengthText.style.color = getStrengthColor(v);
         });
 
-        function updateRule(element, label, passed) {
-            element.textContent = (passed ? "✔ " : "✘ ") + label;
-            element.className = passed ? "text-success" : "text-danger";
+        function updateRule(el, label, pass) {
+            el.textContent = (pass ? "✔ " : "✘ ") + label;
+            el.className = pass ? "text-success" : "text-danger";
         }
 
         function getStrength(p) {
-            if (p.length === 0) return "";
-
+            if (!p) return "";
             let score = 0;
             if (p.length >= 6) score++;
             if (/[A-Z]/.test(p)) score++;
             if (/[a-z]/.test(p)) score++;
             if (/[0-9]/.test(p)) score++;
-
             return ["Very Weak", "Weak", "Medium", "Strong", "Very Strong"][score];
         }
 
@@ -113,10 +106,7 @@
             if (/[A-Z]/.test(p)) score++;
             if (/[a-z]/.test(p)) score++;
             if (/[0-9]/.test(p)) score++;
-
             return ["red", "orangered", "gold", "green", "darkgreen"][score];
         }
-
     </script>
 }
-

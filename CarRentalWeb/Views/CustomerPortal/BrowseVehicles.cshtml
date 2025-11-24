@@ -5,18 +5,98 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h2>Available Vehicles</h2>
+<h2 class="gt-page-title">Available Vehicles</h2>
 
-<div class="row mt-3">
+<!-- FILTER + SEARCH + SORT BAR -->
+<form method="get" class="gt-filter-bar">
+
+    <!-- SEARCH -->
+    <input type="text"
+           name="search"
+           placeholder="Search Make / Model..."
+           value="@Context.Request.Query["search"]"
+           class="gt-filter-select" />
+
+    <!-- TYPE -->
+    <select name="type" class="gt-filter-select">
+        <option value="">All Types</option>
+        <option value="Car">Car</option>
+        <option value="Bike">Bike</option>
+        <option value="Truck">Truck</option>
+    </select>
+
+    <!-- FUEL (Cars) -->
+    <select name="fuel" class="gt-filter-select">
+        <option value="">Fuel Type</option>
+        <option value="Fuel">Petrol/Diesel</option>
+        <option value="Electric">Electric</option>
+    </select>
+
+    <!-- TRANSMISSION -->
+    <select name="trans" class="gt-filter-select">
+        <option value="">Transmission</option>
+        <option value="Automatic">Automatic</option>
+        <option value="Manual">Manual</option>
+    </select>
+
+    <!-- STATUS -->
+    <select name="status" class="gt-filter-select">
+        <option value="">Status</option>
+        <option value="Available">Available</option>
+        <option value="Rented">Rented</option>
+    </select>
+
+    <!-- SORT -->
+    <select name="sort" class="gt-filter-select">
+        <option value="">Sort By</option>
+        <option value="price_asc">Price: Low → High</option>
+        <option value="price_desc">Price: High → Low</option>
+        <option value="year_new">Newest Year</option>
+        <option value="year_old">Oldest Year</option>
+        <option value="make_az">Make A → Z</option>
+        <option value="make_za">Make Z → A</option>
+    </select>
+
+    <button type="submit" class="btn gt-filter-btn">Apply</button>
+</form>
+
+
+<!-- VEHICLE CARDS -->
+<div class="row mt-4">
     @foreach (var v in Model)
     {
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h4>@v.Make @v.Model</h4>
-                    <p>@v.Year</p>
-                    <a asp-action="VehicleDetails" asp-route-id="@v.Id" class="btn btn-primary">View</a>
+        <div class="col-md-4 mb-4">
+            <div class="gt-car-card">
+
+                <!-- IMAGE -->
+                <div class="gt-card-image-box">
+                    @if (!string.IsNullOrEmpty(v.ImagePath))
+                    {
+                        <img src="@v.ImagePath" class="gt-card-image" />
+                    }
+                    else
+                    {
+                        <div class="gt-no-image">No Image</div>
+                    }
                 </div>
+
+                <!-- INFO -->
+                <div class="gt-car-info">
+                    <h4 class="gt-car-name">@v.Make @v.Model</h4>
+                    <p class="gt-car-year">@v.Year</p>
+
+                    <div class="gt-car-specbox">
+                        <p><strong>Color:</strong> @v.Color</p>
+                        <p><strong>Supplier:</strong> @v.Supplier</p>
+                        <p><strong>Status:</strong> @v.Status</p>
+                        <p><strong>Rate/Day:</strong> @v.RatePerDay.ToString("C")</p>
+                    </div>
+
+                    <a asp-action="VehicleDetails"
+                       asp-route-id="@v.Id"
+                       class="btn gt-view-btn">View</a>
+                </div>
+
             </div>
         </div>
     }

@@ -1,81 +1,75 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using VehicleRentalWeb.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
-builder.Services.AddControllersWithViews();
-
+// DB
 builder.Services.AddDbContext<RentalContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity
+// MVC
+builder.Services.AddControllersWithViews();
+
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Identity (the missing part)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-    options.User.RequireUniqueEmail = true;
 })
-    .AddEntityFrameworkStores<RentalContext>()
-    .AddDefaultTokenProviders();
-builder.Services.AddTransient<IdentitySeeder>();
+.AddEntityFrameworkStores<RentalContext>()
+.AddDefaultTokenProviders();
 
+// Cookie auth path
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
-});
-
-// Session (if you still use it)
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    options.LogoutPath = "/Account/Logout";
 });
 
 var app = builder.Build();
 
-// seed roles + admin
-using (var scope = app.Services.CreateScope())
+// Swagger only in dev
+if (app.Environment.IsDevelopment())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var seeder = services.GetRequiredService<IdentitySeeder>();
-        await seeder.SeedAsync();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-// pipeline
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// MVC routes
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+
+// API routes
+app.MapControllers();
 
 app.Run();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var seeder = new VehicleRentalWeb.Seeding.IdentitySeeder(
+        services.GetRequiredService<RoleManager<IdentityRole>>(),
+        services.GetRequiredService<UserManager<ApplicationUser>>(),
+        services.GetRequiredService<IConfiguration>()
+    );
+
+    await seeder.SeedAsync();
+}

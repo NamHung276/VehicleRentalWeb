@@ -36,26 +36,42 @@
                     <td>@r.StartDate.ToShortDateString()</td>
                     <td>@r.EndDate.ToShortDateString()</td>
                     <td>@r.TotalCost.ToString("C")</td>
-                    <td>@r.Status</td>
+
                     <td>
-                        @if (r.PaymentStatus == PaymentStatus.Pending)
+                        @if (r.Status == RentalStatus.Cancelled)
                         {
-                            <form asp-controller="CustomerPortal" asp-action="PayRental" asp-route-id="@r.Id" method="post" class="d-inline">
+                            <span class="badge bg-secondary">Cancelled</span>
+                        }
+                        else
+                        {
+                            @r.Status
+                        }
+                    </td>
+
+                    <td>
+                        @if (r.PaymentStatus == PaymentStatus.Pending
+                                            && r.Status == RentalStatus.Pending)
+                        {
+                            <form asp-controller="CustomerPortal" asp-action="PayRental"
+                                  asp-route-id="@r.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-sm btn-warning">Pay Now</button>
                             </form>
                         }
-                        else
-                        {
-                            <span class="badge bg-success">Paid</span>
-                        }
 
-                        @if ((r.Status == RentalStatus.Pending || r.Status == RentalStatus.Approved) && r.PaymentStatus != PaymentStatus.Paid)
+                        @if ((r.Status == RentalStatus.Pending || r.Status == RentalStatus.Approved)
+                                            && r.PaymentStatus != PaymentStatus.Paid)
                         {
-                            <form asp-controller="CustomerRental" asp-action="CancelRental" asp-route-id="@r.Id" method="post" class="d-inline">
+                            <form asp-controller="CustomerRental" asp-action="CancelRental"
+                                  asp-route-id="@r.Id" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                             </form>
+                        }
+
+                        @if (r.Status == RentalStatus.Cancelled)
+                        {
+                            <span class="badge bg-secondary">Cancelled</span>
                         }
                     </td>
                 </tr>

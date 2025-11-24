@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
         <div class="container">
@@ -27,38 +28,53 @@
             <div class="collapse navbar-collapse" id="customerNav">
                 <ul class="navbar-nav me-auto">
 
-                    <!-- HOME -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="Home">Home</a>
-                    </li>
+                    @{
+                        bool isAuth = User?.Identity?.IsAuthenticated ?? false;
+                        bool isCustomer = User?.IsInRole("Customer") ?? false;
+                    }
 
-                    <!-- MY RENTALS -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="MyRentals">My Rentals</a>
-                    </li>
+                    @if (isAuth && isCustomer)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="CustomerPortal" asp-action="Home">Home</a>
+                        </li>
 
-                    <!-- BROWSE VEHICLES -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">
-                            Browse Vehicles
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="CustomerPortal" asp-action="MyRentals">My Rentals</a>
+                        </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a>
+                        </li>
+                    }
                 </ul>
 
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item me-2">
-                        <a class="nav-link" asp-controller="Account" asp-action="Index">
-                            @User?.Identity?.Name
-                        </a>
-                    </li>
+                    @if (isAuth)
+                    {
+                        <li class="nav-item me-2">
+                            <span class="navbar-text text-white">
+                                @(User?.Identity?.Name ?? "User")
+                            </span>
+                        </li>
 
-                    <li class="nav-item">
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                        </form>
-                    </li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                        </li>
+                    }
                 </ul>
             </div>
 

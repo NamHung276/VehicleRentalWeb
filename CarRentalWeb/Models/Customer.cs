@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace VehicleRentalWeb.Models
 {
@@ -30,5 +31,10 @@ namespace VehicleRentalWeb.Models
 
         [Display(Name = "Archived")]
         public bool IsArchived { get; set; } = false;
+
+        // ----------------------------
+        // Navigation property for rentals
+        // ----------------------------
+        public ICollection<Rental> Rentals { get; set; } = new List<Rental>();
     }
 }

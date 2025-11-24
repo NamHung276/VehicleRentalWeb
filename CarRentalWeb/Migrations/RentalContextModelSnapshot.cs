@@ -289,6 +289,9 @@ namespace VehicleRentalWeb.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CustomerId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -316,6 +319,8 @@ namespace VehicleRentalWeb.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("CustomerId1");
 
                     b.HasIndex("VehicleId");
 
@@ -535,6 +540,10 @@ namespace VehicleRentalWeb.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
+                    b.HasOne("VehicleRentalWeb.Models.Customer", null)
+                        .WithMany("Rentals")
+                        .HasForeignKey("CustomerId1");
+
                     b.HasOne("VehicleRentalWeb.Models.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
@@ -544,6 +553,11 @@ namespace VehicleRentalWeb.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("VehicleRentalWeb.Models.Customer", b =>
+                {
+                    b.Navigation("Rentals");
                 });
 #pragma warning restore 612, 618
         }

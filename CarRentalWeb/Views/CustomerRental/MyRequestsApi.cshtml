@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "My Rentals (API)";
+}
+
+<div class="container mt-4">
+    <h2>My Rentals (from API)</h2>
+    <table class="table table-bordered" id="rentalsTable">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Vehicle</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="7">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        // Safely get the current logged-in customer's ID from Razor
+        const currentUserId = "@(User.FindFirst("CustomerId")?.Value ?? "0")";
+
+        async function loadMyRentals() {
+            try {
+                // Call your API endpoint
+                const response = await fetch('/api/customer/rentals');
+                if (!response.ok) throw new Error("Failed to fetch rentals");
+
+                const rentals = await response.json();
+
+                // Filter rentals belonging to current customer
+                const myRentals = rentals.filter(r => r.customerId == currentUserId);
+
+                const tbody = document.querySelector("#myRentalsTable tbody");
+                tbody.innerHTML = ""; // Clear existing rows
+
+                myRentals.forEach(r => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${r.id}</td>
+                        <td>${r.vehicleMake} ${r.vehicleModel}</td>
+                        <td>${new Date(r.startDate).toLocaleDateString()}</td>
+                        <td>${new Date(r.endDate).toLocaleDateString()}</td>
+                        <td>${r.totalCost.toLocaleString("en-US", { style: "currency", currency: "USD" })}</td>
+                        <td>${r.status}</td>
+                        <td>${r.paymentStatus}</td>
+                        <td>
+                            ${r.paymentStatus === "Pending" && r.status !== "Cancelled"
+                                ? `<button class="btn btn-warning btn-sm" onclick="payRental(${r.id})">Pay Now</button>`
+                                : r.paymentStatus === "Paid"
+                                    ? `<span class="badge bg-success">Paid</span>`
+                                    : `<span class="text-muted">N/A</span>`
+                            }
+                            ${r.status === "Pending" && r.paymentStatus !== "Paid"
+                                ? `<button class="btn btn-danger btn-sm" onclick="cancelRental(${r.id})">Cancel</button>`
+                                : ""
+                            }
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error(err);
+                alert("Error loading rentals.");
+            }
+        }
+
+        async function payRental(rentalId) {
+            try {
+                const res = await fetch(`/api/customer/pay/${rentalId}`, { method: "POST" });
+                if (!res.ok) throw new Error("Payment failed");
+                alert("Payment successful!");
+                loadMyRentals(); // Refresh table
+            } catch (err) {
+                console.error(err);
+                alert("Error processing payment.");
+            }
+        }
+
+        async function cancelRental(rentalId) {
+            try {
+                if (!confirm("Cancel this rental?")) return;
+
+                const res = await fetch(`/api/customer/cancel/${rentalId}`, { method: "POST" });
+                if (!res.ok) throw new Error("Cancellation failed");
+                alert("Rental cancelled!");
+                loadMyRentals(); // Refresh table
+            } catch (err) {
+                console.error(err);
+                alert("Error cancelling rental.");
+            }
+        }
+
+        // Load rentals on page load
+        document.addEventListener("DOMContentLoaded", loadMyRentals);
+    </script>
+}
+

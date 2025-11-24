@@ -17,21 +17,20 @@ namespace VehicleRentalWeb.Controllers
 
         public IActionResult Index()
         {
-            // Check if user is logged in and is an Admin
-            var role = HttpContext.Session.GetString("Role");
-            if (role != "Admin")
-            {
+            if (!User.IsInRole("Admin"))
                 return RedirectToAction("Login", "Account");
-            }
 
-            // Dashboard statistics
             ViewBag.TotalUsers = _context.Users.Count();
             ViewBag.TotalCustomers = _context.Customers.Count();
             ViewBag.TotalRentals = _context.Rentals.Count();
-            ViewBag.ActiveRentals = _context.Rentals.Count(r => r.IsActive);
+
+            // FIXED: NotMapped property moved to in-memory evaluation
+            ViewBag.ActiveRentals = _context.Rentals
+                .AsEnumerable()
+                .Count(r => r.IsActive);
+
             ViewBag.TotalVehicles = _context.Vehicles.Count();
 
-            // Optional: list of recent rentals
             var recentRentals = _context.Rentals
                 .Include(r => r.Customer)
                 .OrderByDescending(r => r.StartDate)

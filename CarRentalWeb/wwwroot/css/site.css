@@ -1,4 +1,4 @@
-/* ===GLOBAL STYLES=== */
+/* === GLOBAL STYLES === */
 html {
     font-size: 14px;
     position: relative;
@@ -18,7 +18,7 @@ body {
     color: #333;
 }
 
-/* ===NAVBAR=== */
+/* === NAVBAR === */
 .navbar {
     background-color: #e3f2fd !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -26,23 +26,31 @@ body {
 
 .navbar-brand {
     font-weight: bold;
-    color: #0d6efd !important;
     letter-spacing: 0.5px;
 }
 
-.nav-link {
-    transition: color 0.3s ease, transform 0.2s ease;
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .navbar-text,
+.navbar .btn,
+.navbar .btn-link {
+    color: #212529 !important;
 }
 
-    .nav-link:hover {
+    .navbar .nav-link:hover,
+    .navbar .btn:hover,
+    .navbar .btn-link:hover {
         color: #0a58ca !important;
-        transform: translateY(-1px);
     }
 
-/* === FOOTER ==== */
+    .navbar .nav-link.active {
+        color: #0d6efd !important;
+        font-weight: 600;
+    }
+
+/* === FOOTER === */
 footer {
     position: relative;
-    bottom: 0;
     width: 100%;
     height: 60px;
     background-color: #e9ecef;
@@ -82,10 +90,8 @@ footer {
         border-color: #b02a37;
     }
 
-/* === BUTTON FOCUS === */
 .btn:focus,
 .btn:active:focus,
-.btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
@@ -93,9 +99,9 @@ footer {
 
 /* === TABLES === */
 table {
-    border-collapse: collapse;
     width: 100%;
-    background-color: #ffffff;
+    background-color: #fff;
+    border-collapse: collapse;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -116,11 +122,7 @@ th {
     padding-bottom: 80px;
 }
 
-.main-content {
-    min-height: 80vh;
-}
-
-/* === HOME PAGE HERO SECTION === */
+/* === HOME PAGE HERO === */
 .home-hero {
     padding: 80px 0;
     background: linear-gradient(to bottom, #eaf4ff 0%, #ffffff 100%);
@@ -142,7 +144,7 @@ th {
         color: #555;
     }
 
-/* === HOME FEATURE SECTION === */
+/* === HOME FEATURES === */
 .features {
     padding: 60px 0;
 }
@@ -150,14 +152,14 @@ th {
 .feature-box {
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     padding: 30px 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
     .feature-box:hover {
         transform: translateY(-5px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     }
 
     .feature-box h4 {
@@ -165,91 +167,81 @@ th {
     }
 
     .feature-box p {
-        color: #555;
         font-size: 1rem;
+        color: #555;
     }
 
-/* === FEATURE BOX LINKS === */
 .feature-link {
     text-decoration: none;
     color: inherit;
 }
 
-    .feature-link:hover .feature-box {
-        transform: translateY(-8px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-    }
-
-.feature-box .btn {
-    pointer-events: none; /* Prevent double-click conflict */
-}
-
-.car-grid {
-    padding: 50px 0;
-}
-
-.car-card {
+/* === VEHICLE BROWSE CARDS === */
+.gt-car-card {
     background-color: #ffffff;
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    height: 100%;
+    border: 1px solid #e5e5e5;
 }
 
-    .car-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    .gt-car-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
     }
 
-.car-image {
+/* Image box stays consistent */
+.gt-card-image-box {
     width: 100%;
-    height: 180px;
-    object-fit: cover;
+    height: 140px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
 }
 
-.card img {
-    transition: transform 0.3s ease-in-out;
+/* Image fits inside without zooming or stretching */
+.gt-card-image {
+    width: auto;
+    height: 100%;
+    object-fit: contain;
 }
 
-.card:hover img {
-    transform: scale(1.05);
-}
-
-
-.car-info {
+/* Text section */
+.gt-card-info {
     padding: 15px;
 }
 
-.car-name {
+.gt-car-name {
     font-weight: 700;
     color: #0d6efd;
+    margin-bottom: 6px;
 }
 
-.car-details {
-    font-size: 0.9rem;
+.gt-car-details {
     color: #555;
-    margin-bottom: 10px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
 }
 
-.car-footer {
+.gt-car-footer {
+    padding: 12px 15px;
     border-top: 1px solid #eee;
-    padding-top: 10px;
 }
 
-.car-grid {
-    padding: 20px 0 100px 0;
-}
-
-.price {
+.gt-price {
     font-weight: bold;
     color: #198754;
 }
 
 @media (max-width: 576px) {
-    .car-card {
+    .gt-car-card {
         margin-bottom: 1rem;
     }
 
-    .car-info p {
+    .gt-car-info p {
         font-size: 0.85rem;
     }
 
@@ -257,3 +249,32 @@ th {
         font-size: 1.3rem;
     }
 }
+
+.gt-filter-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.gt-filter-select {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    background: #111;
+    color: white;
+    font-weight: 600;
+}
+
+.gt-filter-btn {
+    padding: 10px 20px;
+    background: #e3062f;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    border: none;
+    transition: 0.2s;
+}
+
+    .gt-filter-btn:hover {
+        background: #ff1d4d;
+    }

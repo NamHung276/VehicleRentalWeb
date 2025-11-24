@@ -1,3 +1,16 @@
-﻿@{
-    Layout = "_Layout";
+﻿@using System.Security.Claims
+
+@{
+    var isAuthenticated = Context.User?.Identity?.IsAuthenticated == true;
+    var isAdmin = Context.User?.IsInRole("Admin") == true;
+    var isCustomer = Context.User?.IsInRole("Customer") == true;
+
+    if (isAdmin)
+    {
+        Layout = "_Layout";   // Admin Layout
+    }
+    else
+    {
+        Layout = "_CustomerLayout"; // Customer default
+    }
 }

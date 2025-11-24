@@ -17,6 +17,7 @@
 	  
 	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.18" />
 	<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.18" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>

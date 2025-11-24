@@ -27,8 +27,10 @@ namespace VehicleRentalWeb.Controllers
         // REGISTER
         // --------------------------
         [HttpGet]
-        public IActionResult Register() => View(new RegisterViewModel());
-
+        public IActionResult Register()
+        {
+            return View(new RegisterViewModel());
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -48,15 +50,16 @@ namespace VehicleRentalWeb.Controllers
 
             if (!result.Succeeded)
             {
-                foreach (var e in result.Errors)
-                    ModelState.AddModelError("", e.Description);
+                foreach (var err in result.Errors)
+                    ModelState.AddModelError("", err.Description);
+
                 return View(vm);
             }
 
             // Assign Customer role
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            // Customer profile
+            // Create Customer profile
             var customer = new Customer
             {
                 UserId = user.Id,
@@ -73,19 +76,23 @@ namespace VehicleRentalWeb.Controllers
             await _context.SaveChangesAsync();
 
             // Auto-login after register
-            await _signInManager.SignInAsync(user, false);
+            await _signInManager.SignInAsync(user, isPersistent: false);
 
-            // Redirect to CustomerPortal
             return RedirectToAction("Home", "CustomerPortal");
         }
+
 
         // --------------------------
         // LOGIN
         // --------------------------
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null) =>
-            View(new LoginViewModel { ReturnUrl = returnUrl });
-
+        public IActionResult Login(string? returnUrl = null)
+        {
+            return View(new LoginViewModel
+            {
+                ReturnUrl = returnUrl
+            });
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -98,7 +105,7 @@ namespace VehicleRentalWeb.Controllers
                 vm.Email,
                 vm.Password,
                 vm.RememberMe,
-                false);
+                lockoutOnFailure: false);
 
             if (!result.Succeeded)
             {
@@ -106,25 +113,25 @@ namespace VehicleRentalWeb.Controllers
                 return View(vm);
             }
 
-            // Get user safely
             var user = await _userManager.FindByEmailAsync(vm.Email);
+
             if (user == null)
             {
                 await _signInManager.SignOutAsync();
-                ModelState.AddModelError("", "User account could not be loaded.");
+                ModelState.AddModelError("", "Unable to load user.");
                 return View(vm);
             }
 
-            // Role-based redirect
+            // Role redirect
             if (await _userManager.IsInRoleAsync(user, "Admin"))
                 return RedirectToAction("Index", "AdminDashboard");
 
             if (await _userManager.IsInRoleAsync(user, "Customer"))
                 return RedirectToAction("Home", "CustomerPortal");
 
-            // fallback
             return RedirectToAction("Index", "Home");
         }
+
 
         // --------------------------
         // LOGOUT
@@ -137,7 +144,14 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
+        // --------------------------
+        // ACCESS DENIED
+        // --------------------------
         [AllowAnonymous]
-        public IActionResult AccessDenied() => View();
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

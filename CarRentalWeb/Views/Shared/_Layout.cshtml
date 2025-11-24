@@ -7,105 +7,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Vehicle Rental</title>
 
-    <!-- Bootstrap & Custom Styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/VehicleRentalWeb.styles.css" asp-append-version="true" />
 </head>
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm mb-3">
             <div class="container">
 
-                <!-- Branding -->
                 <a class="navbar-brand fw-bold text-primary"
                    asp-controller="Home" asp-action="Index">
                     Vehicle Rental
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse justify-content-end" id="mainNavbar">
                     <ul class="navbar-nav">
 
-                        @* ROLE HELPERS *@
                         @{
-                            var isAuthenticated = User?.Identity?.IsAuthenticated == true;
-                            var isAdmin = User?.IsInRole("Admin") == true;
-                            var isCustomer = User?.IsInRole("Customer") == true;
+                            bool isAuth = User?.Identity?.IsAuthenticated ?? false;
+                            bool isAdmin = User?.IsInRole("Admin") ?? false;
+                            bool isCustomer = User?.IsInRole("Customer") ?? false;
                         }
 
-                        <!-- HOME (Role Based) -->
+                        <!-- HOME -->
                         <li class="nav-item">
                             @if (isAdmin)
                             {
-                                <a class="nav-link text-dark"
-                                   asp-controller="AdminDashboard" asp-action="Index">Home</a>
+                                <a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">Admin Home</a>
                             }
                             else if (isCustomer)
                             {
-                                <a class="nav-link text-dark"
-                                   asp-controller="CustomerPortal" asp-action="Home">Home</a>
+                                <a class="nav-link" asp-controller="CustomerPortal" asp-action="Home">Home</a>
                             }
                             else
                             {
-                                <a class="nav-link text-dark"
-                                   asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                             }
                         </li>
 
-                        <!-- ADMIN NAVIGATION -->
+                        <!-- ADMIN NAV -->
                         @if (isAdmin)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Vehicle" asp-action="Index">Vehicles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Customer" asp-action="Index">Customers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Rental" asp-action="Index">Rentals</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Vehicle" asp-action="Index">Vehicles</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Rental" asp-action="Index">Rentals</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
                         }
 
-                        <!-- CUSTOMER NAVIGATION -->
+                        <!-- CUSTOMER NAV -->
                         @if (isCustomer)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="Dashboard">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="CustomerRental" asp-action="MyRequests">My Rentals</a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="CustomerRental" asp-action="MyRequests">My Rentals</a></li>
                         }
 
                         <!-- LOGIN / LOGOUT -->
-                        @if (isAuthenticated)
+                        @if (isAuth)
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-primary" href="#" id="userDropdown"
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @User?.Identity?.Name
+                                <a class="nav-link dropdown-toggle text-primary" href="#" data-bs-toggle="dropdown">
+                                    @(User?.Identity?.Name ?? "User")
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <form asp-controller="Account" asp-action="Logout"
-                                              method="post" class="dropdown-item p-0">
+                                        <form asp-controller="Account" asp-action="Logout" method="post"
+                                              class="dropdown-item p-0">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit"
-                                                    class="btn btn-link text-danger w-100 text-start">
-                                                Logout
-                                            </button>
+                                            <button type="submit" class="btn btn-link text-danger w-100 text-start">Logout</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -114,14 +89,15 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
                     </ul>
                 </div>
+
             </div>
         </nav>
     </header>
@@ -134,16 +110,14 @@
 
     <footer class="border-top footer text-muted text-center mt-4">
         <div class="container">
-            &copy; 2025 - Vehicle Rental Web |
-            <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+            &copy; 2025 - Vehicle Rental Web
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
 
+    <!-- RENDER VIEW-SPECIFIC SCRIPTS -->
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
