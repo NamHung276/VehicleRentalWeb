@@ -11,23 +11,104 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        /* Floating AI Chat Icon */
+        #chatIcon {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: white;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+            #chatIcon:hover {
+                transform: scale(1.1);
+                background: #0b5ed7;
+            }
+
+        /* Chat Container */
+        #chatContainer {
+            position: fixed;
+            bottom: 95px;
+            right: 25px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            z-index: 9998;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #chatHeader {
+            background: #0d6efd;
+            color: white;
+            padding: 10px 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            #chatHeader span {
+                cursor: pointer;
+                font-size: 18px;
+            }
+
+        #chatWindow {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+
+        #chatInputContainer {
+            padding: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        #chatSend {
+            margin-left: 8px;
+        }
+    </style>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
         <div class="container">
-
             <a class="navbar-brand" asp-controller="CustomerPortal" asp-action="Home">
                 Customer Portal
             </a>
-
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="customerNav">
                 <ul class="navbar-nav me-auto">
-
                     @{
                         bool isAuth = User?.Identity?.IsAuthenticated ?? false;
                         bool isCustomer = User?.IsInRole("Customer") ?? false;
@@ -38,11 +119,9 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="CustomerPortal" asp-action="Home">Home</a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="CustomerPortal" asp-action="MyRentals">My Rentals</a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="CustomerPortal" asp-action="BrowseVehicles">Browse Vehicles</a>
                         </li>
@@ -57,7 +136,6 @@
                                 @(User?.Identity?.Name ?? "User")
                             </span>
                         </li>
-
                         <li class="nav-item">
                             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
@@ -70,14 +148,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
                         </li>
                     }
                 </ul>
             </div>
-
         </div>
     </nav>
 
@@ -93,8 +169,87 @@
         </div>
     </footer>
 
+    <!-- Floating Chat Icon & Container -->
+    <div id="chatIcon">💬</div>
+
+    <div id="chatContainer">
+        <div id="chatHeader">
+            AI Assistant
+            <span id="chatClose">✖</span>
+        </div>
+        <div id="chatWindow"></div>
+        <div id="chatInputContainer">
+            <input id="chatInput" type="text" placeholder="Ask AI..." />
+            <button id="chatSend" class="btn btn-primary">Send</button>
+        </div>
+        <div id="chatStatus" class="small text-muted mt-1 ms-2"></div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        const chatIcon = document.getElementById('chatIcon');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatClose = document.getElementById('chatClose');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatStatus = document.getElementById('chatStatus');
+
+        // Show/hide chat
+        chatIcon.addEventListener('click', () => {
+            chatContainer.style.display = chatContainer.style.display === 'flex' ? 'none' : 'flex';
+        });
+        chatClose.addEventListener('click', () => {
+            chatContainer.style.display = 'none';
+        });
+
+        // Append messages
+        function appendMessage(who, text) {
+            const wrapper = document.createElement('div');
+            wrapper.style.marginBottom = '10px';
+            const whoSpan = document.createElement('div');
+            whoSpan.style.fontWeight = '600';
+            whoSpan.style.marginBottom = '4px';
+            whoSpan.textContent = who;
+            const textDiv = document.createElement('div');
+            textDiv.style.whiteSpace = 'pre-wrap';
+            textDiv.textContent = text;
+            wrapper.appendChild(whoSpan);
+            wrapper.appendChild(textDiv);
+            chatWindow.appendChild(wrapper);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Send message to controller
+        async function sendMessage() {
+            const input = chatInput.value.trim();
+            if (!input) return;
+            appendMessage('You', input);
+            chatInput.value = '';
+            chatStatus.textContent = 'Thinking...';
+            try {
+                const res = await fetch('@Url.Action("ChatBot", "CustomerPortal")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: input })
+                });
+                const data = await res.json();
+                let reply = data.reply ?? data.output ?? data.response ?? "No response";
+                appendMessage('AI', reply);
+            } catch (err) {
+                appendMessage('AI', 'Network error: ' + (err.message || err));
+            } finally {
+                chatStatus.textContent = '';
+            }
+        }
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
 </body>
 </html>

@@ -278,3 +278,34 @@ th {
     .gt-filter-btn:hover {
         background: #ff1d4d;
     }
+
+/* === AI CHAT FLOATING ICON & WINDOW === */
+#chatIcon {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background-color: #0d6efd;
+    color: white;
+    font-size: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: background-color 0.3s ease;
+}
+
+    #chatIcon:hover {
+        background-color: #0b5ed7;
+    }
+
+#chatContainer {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    display: none;
+    z-index: 9999;
+}

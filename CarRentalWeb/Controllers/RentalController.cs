@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -16,9 +17,7 @@ namespace VehicleRentalWeb.Controllers
             _context = context;
         }
 
-        // -------------------------------------------------------
-        // LIST ALL RENTALS
-        // -------------------------------------------------------
+        // -------------------- LIST ALL RENTALS --------------------
         public async Task<IActionResult> Index()
         {
             var rentals = await _context.Rentals
@@ -30,9 +29,7 @@ namespace VehicleRentalWeb.Controllers
             return View(rentals);
         }
 
-        // -------------------------------------------------------
-        // RENTAL DETAILS
-        // -------------------------------------------------------
+        // -------------------- RENTAL DETAILS --------------------
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -47,9 +44,7 @@ namespace VehicleRentalWeb.Controllers
             return View(rental);
         }
 
-        // -------------------------------------------------------
-        // CREATE RENTAL (GET)
-        // -------------------------------------------------------
+        // -------------------- CREATE RENTAL (CUSTOMER) --------------------
         public IActionResult Create()
         {
             ViewBag.Customers = _context.Customers.ToList();
@@ -57,9 +52,6 @@ namespace VehicleRentalWeb.Controllers
             return View();
         }
 
-        // -------------------------------------------------------
-        // CREATE RENTAL (POST)
-        // -------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Rental rental)
@@ -88,8 +80,6 @@ namespace VehicleRentalWeb.Controllers
             rental.CreatedAt = DateTime.Now;
             rental.Status = RentalStatus.Pending;
             rental.PaymentStatus = PaymentStatus.Pending;
-
-            // Calculate cost: 50 per day (modify if needed)
             rental.TotalCost = (decimal)(rental.EndDate - rental.StartDate).TotalDays * 50;
 
             _context.Add(rental);
@@ -97,35 +87,27 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // -------------------------------------------------------
-        // EDIT RENTAL (GET)
-        // -------------------------------------------------------
+        // -------------------- EDIT RENTAL (CUSTOMER) --------------------
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
             var rental = await _context.Rentals.FindAsync(id);
             if (rental == null) return NotFound();
-
             if (!rental.IsActive)
                 return BadRequest("Cannot edit a completed, cancelled, or rejected rental.");
 
             ViewBag.Customers = _context.Customers.ToList();
             ViewBag.Vehicles = _context.Vehicles.Where(v => !v.IsRemoved && v.Status == "Available").ToList();
-
             return View(rental);
         }
 
-        // -------------------------------------------------------
-        // EDIT RENTAL (POST)
-        // -------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Rental rental)
         {
             var existing = await _context.Rentals.FindAsync(rental.Id);
             if (existing == null) return NotFound();
-
             if (!existing.IsActive)
                 return BadRequest("Cannot edit this rental anymore.");
 
@@ -148,7 +130,6 @@ namespace VehicleRentalWeb.Controllers
                 return View(rental);
             }
 
-            // Apply updates
             existing.CustomerId = rental.CustomerId;
             existing.VehicleId = rental.VehicleId;
             existing.StartDate = rental.StartDate;
@@ -159,9 +140,52 @@ namespace VehicleRentalWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // -------------------------------------------------------
-        // PAY RENTAL
-        // -------------------------------------------------------
+        // -------------------- ADMIN ACTIONS --------------------
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var rental = await _context.Rentals.FindAsync(id);
+            if (rental == null) return NotFound();
+
+            if (rental.Status != RentalStatus.Pending)
+                return BadRequest("Only pending rentals can be approved.");
+
+            rental.Status = RentalStatus.Approved;
+            rental.PaymentStatus = PaymentStatus.Paid;
+            rental.PaymentDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var rental = await _context.Rentals.FindAsync(id);
+            if (rental == null) return NotFound();
+
+            if (rental.Status != RentalStatus.Pending)
+                return BadRequest("Only pending rentals can be rejected.");
+
+            rental.Status = RentalStatus.Rejected;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var rental = await _context.Rentals.FindAsync(id);
+            if (rental == null) return NotFound();
+            if (!rental.IsActive)
+                return BadRequest("Rental is already completed or cancelled.");
+
+            rental.Status = RentalStatus.Cancelled;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // -------------------- CUSTOMER PAY --------------------
         public async Task<IActionResult> Pay(int id)
         {
             var rental = await _context.Rentals.FindAsync(id);
@@ -174,35 +198,6 @@ namespace VehicleRentalWeb.Controllers
             rental.Status = RentalStatus.Approved;
             rental.PaymentDate = DateTime.Now;
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        // -------------------------------------------------------
-        // REJECT RENTAL
-        // -------------------------------------------------------
-        public async Task<IActionResult> Reject(int id)
-        {
-            var rental = await _context.Rentals.FindAsync(id);
-            if (rental == null) return NotFound();
-
-            rental.Status = RentalStatus.Rejected;
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        // -------------------------------------------------------
-        // CANCEL RENTAL
-        // -------------------------------------------------------
-        public async Task<IActionResult> Cancel(int id)
-        {
-            var rental = await _context.Rentals.FindAsync(id);
-            if (rental == null) return NotFound();
-
-            if (!rental.IsActive)
-                return BadRequest("Rental is already completed or cancelled.");
-
-            rental.Status = RentalStatus.Cancelled;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

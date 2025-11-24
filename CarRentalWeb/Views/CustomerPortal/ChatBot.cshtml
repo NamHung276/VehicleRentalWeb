@@ -1,0 +1,86 @@
+﻿@section Scripts {
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const chatIcon = document.getElementById('chatIcon');
+        const chatClose = document.getElementById('chatClose');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatStatus = document.getElementById('chatStatus');
+
+        // Toggle chat window
+        chatIcon.addEventListener('click', () => {
+            chatContainer.style.display = 'block';
+            chatIcon.style.display = 'none';
+            chatInput.focus();
+        });
+        chatClose.addEventListener('click', () => {
+            chatContainer.style.display = 'none';
+            chatIcon.style.display = 'block';
+        });
+
+        // Append chat messages
+        function appendMessage(who, text) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('chat-message', who === 'You' ? 'you' : 'ai');
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('chat-avatar');
+            avatar.textContent = who === 'You' ? '😎' : '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble');
+            bubble.textContent = text;
+
+            if (who === 'You') {
+                wrapper.appendChild(bubble);
+                wrapper.appendChild(avatar);
+            } else {
+                wrapper.appendChild(avatar);
+                wrapper.appendChild(bubble);
+            }
+
+            chatWindow.appendChild(wrapper);
+            chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+        }
+
+        // Send message to Grok
+        async function sendMessage() {
+            const input = chatInput.value.trim();
+            if (!input) return;
+
+            appendMessage('You', input);
+            chatInput.value = '';
+            chatStatus.textContent = 'AI is typing...';
+
+            try {
+                const res = await fetch('@Url.Action("ChatBot", "CustomerPortal")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: input })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => null);
+                    const msg = (err && err.error) ? err.error : `AI request failed (${res.status})`;
+                    appendMessage('AI', msg);
+                    return;
+                }
+
+                const data = await res.json();
+                const reply = data.reply ?? data.output ?? data.response ?? "Sorry, I couldn't understand that.";
+                appendMessage('AI', reply);
+
+            } catch (err) {
+                appendMessage('AI', 'Network error: ' + (err.message || err));
+            } finally {
+                chatStatus.textContent = '';
+            }
+        }
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+}
